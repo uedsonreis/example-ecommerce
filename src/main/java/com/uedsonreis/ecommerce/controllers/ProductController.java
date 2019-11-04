@@ -39,20 +39,17 @@ public class ProductController {
 		
 		ReturnType result = new ReturnType();
 		
-		Boolean saved = this.productService.save(product);
-		result.setData(saved);
+		Integer productId = this.productService.save(product);
+		result.setData(productId);
 		
 		return result;
 	}
 	
 	@RequestMapping("/remove")
-	public ReturnType remove(@RequestParam(value="name") String name) {
+	public ReturnType remove(@RequestParam(value="id") Integer id) {
 		ReturnType result = new ReturnType();
 		
-		Product product = new Product();
-		product.setName(name);
-		
-		if (!this.productService.remove(product)) {
+		if (!this.productService.remove(id)) {
 			result.setSuccess(false);
 			result.setMessage("This ID is not registered in database.");
 		}

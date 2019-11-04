@@ -1,7 +1,8 @@
 package com.uedsonreis.ecommerce.services;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
@@ -10,19 +11,17 @@ import com.uedsonreis.ecommerce.entities.Product;
 @Service
 public class ProductService {
 
-	private Collection<Product> repository = new HashSet<>();
+	private final List<Product> repository = new ArrayList<>();
 	
-	public Boolean save(Product product) {
-		return this.repository.add(product);
+	public Integer save(Product product) {
+		if (this.repository.add(product)) {
+			return this.repository.indexOf(product);
+		}
+		return null;
 	}
 	
-	public Boolean remove(Product product) {
-		
-		if (this.repository.contains(product)) {
-			return this.repository.remove(product);
-		}
-		
-		return false;
+	public Boolean remove(int id) {
+		return (this.repository.remove(id) != null);
 	}
 	
 	public Collection<Product> getProducts() {
