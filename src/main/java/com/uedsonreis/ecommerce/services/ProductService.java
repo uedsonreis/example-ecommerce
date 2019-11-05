@@ -20,6 +20,11 @@ public class ProductService {
 		return null;
 	}
 	
+	public Product get(Integer id) {
+		if (id < 0 || id >= this.repository.size()) return null;
+		return this.repository.get(id);
+	}
+	
 	public Boolean remove(int id) {
 		return (this.repository.remove(id) != null);
 	}

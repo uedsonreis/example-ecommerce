@@ -26,4 +26,9 @@ public class CustomerService {
 		return null;
 	}
 
+	public Customer get(Integer id) {
+		if (id < 0 || id >= this.repository.size()) return null;
+		return this.repository.get(id);
+	}
+
 }
