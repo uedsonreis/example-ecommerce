@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.uedsonreis.ecommerce.entities.Factory;
 import com.uedsonreis.ecommerce.entities.Product;
+import com.uedsonreis.ecommerce.entities.User;
 import com.uedsonreis.ecommerce.services.ProductService;
 import com.uedsonreis.ecommerce.utils.ReturnType;
+import com.uedsonreis.ecommerce.utils.Util;
 
 @RestController
 @RequestMapping("product")
@@ -39,19 +41,34 @@ public class ProductController {
 		
 		ReturnType result = new ReturnType();
 		
-		Integer productId = this.productService.save(product);
-		result.setData(productId);
+		User logged = (User) httpSession.getAttribute(Util.LOGGED);
+		
+		if (logged != null && logged.getAdmin()) {
+			Integer productId = this.productService.save(product);
+			result.setData(productId);
+		} else {
+			result.setSuccess(false);
+			result.setMessage(Util.getMsgYouMustLogInAsAdm());
+		}
 		
 		return result;
 	}
 	
 	@RequestMapping("/remove")
-	public ReturnType remove(@RequestParam(value="id") Integer id) {
+	public ReturnType remove(HttpSession httpSession, @RequestParam(value="id") Integer id) {
+		
 		ReturnType result = new ReturnType();
 		
-		if (!this.productService.remove(id)) {
+		User logged = (User) httpSession.getAttribute(Util.LOGGED);
+		
+		if (logged != null && logged.getAdmin()) {
+			if (!this.productService.remove(id)) {
+				result.setSuccess(false);
+				result.setMessage(Util.getMsgIdIsNotRegistered());
+			}
+		} else {
 			result.setSuccess(false);
-			result.setMessage("This ID is not registered in database.");
+			result.setMessage(Util.getMsgYouMustLogInAsAdm());
 		}
 		
 		return result;
@@ -66,7 +83,7 @@ public class ProductController {
 		
 		if (products == null || products.size() < 1) {
 			result.setSuccess(false);
-			result.setMessage("There is no product registered in database.");
+			result.setMessage(Util.getMsgNoProductRegistered());
 		} else {
 			result.setData(products);
 		}

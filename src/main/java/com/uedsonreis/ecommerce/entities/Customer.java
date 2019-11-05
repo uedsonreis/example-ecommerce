@@ -6,6 +6,7 @@ public class Customer {
 	private String name;
 	private Integer age;
 	private String address;
+	private User user;
 	
 	public String getEmail() {
 		return email;
@@ -33,6 +34,13 @@ public class Customer {
 	}
 	public void setAddress(String address) {
 		this.address = address;
+	}
+	
+	public User getUser() {
+		return user;
+	}
+	public void setUser(User user) {
+		this.user = user;
 	}
 	
 	@Override

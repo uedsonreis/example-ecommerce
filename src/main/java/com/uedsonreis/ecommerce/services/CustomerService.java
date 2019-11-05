@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.uedsonreis.ecommerce.entities.Customer;
+import com.uedsonreis.ecommerce.entities.User;
 
 @Service
 public class CustomerService {
@@ -21,6 +22,17 @@ public class CustomerService {
 		
 		if (this.repository.add(customer)) {
 			return this.repository.indexOf(customer);
+		}
+		
+		return null;
+	}
+	
+	public Customer get(User user) {
+		
+		for (Customer customer: this.repository) {
+			if (customer.getUser().equals(user)) {
+				return customer;
+			}
 		}
 		
 		return null;

@@ -13,6 +13,7 @@ import com.uedsonreis.ecommerce.entities.Customer;
 import com.uedsonreis.ecommerce.entities.Item;
 import com.uedsonreis.ecommerce.entities.Product;
 import com.uedsonreis.ecommerce.entities.SalesOrder;
+import com.uedsonreis.ecommerce.entities.User;
 
 @Service
 public class SalesOrderService {
@@ -25,36 +26,41 @@ public class SalesOrderService {
 
 	private final List<SalesOrder> repository = new ArrayList<>();
 	
-	public Integer invoice(Map<Integer, Item> cart, Integer customerId) {
+	public SalesOrder invoice(Map<Integer, Item> cart, User user) {
+		Double totalValue = 0.0;
+		
 		for (Integer productId: cart.keySet()) {
 			Product product = this.productService.get(productId);
 			if (product == null) return null;
 			
 			Item item = cart.get(productId);
 			item.setProduct(product);
+			totalValue += item.getPrice() * item.getAmount();
 		}
 		
-		Customer customer = this.customerService.get(customerId);
+		Customer customer = this.customerService.get(user);
 		if (customer == null) return null;
 		
 		SalesOrder salesOrder = new SalesOrder();
 		salesOrder.setItems(new HashSet<>(cart.values()));
 		salesOrder.setCustomer(customer);
+		salesOrder.setTotalValue(totalValue);
 		
-		return this.save(salesOrder);
+		this.repository.add(salesOrder);
+		
+		return salesOrder;
 	}
 	
-	private Integer save(SalesOrder salesOrder) {
+	public Collection<SalesOrder> getSalesOrders(User user) {
+		Collection<SalesOrder> result = new ArrayList<>();
 		
-		if (this.repository.add(salesOrder)) {
-			return this.repository.indexOf(salesOrder);
+		for (SalesOrder order: this.repository) {
+			if (order.getCustomer().getUser().equals(user)) {
+				result.add(order);
+			}
 		}
 		
-		return null;
-	}
-	
-	public Collection<SalesOrder> getSalesOrders() {
-		return this.repository;
+		return result;
 	}
 	
 }

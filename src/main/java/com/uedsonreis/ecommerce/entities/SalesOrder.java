@@ -5,9 +5,17 @@ import java.util.Set;
 
 public class SalesOrder {
 
+	private Double totalValue;
 	private Customer customer;
 	private Set<Item> items;
 	private Date createdAt = new Date();
+	
+	public Double getTotalValue() {
+		return totalValue;
+	}
+	public void setTotalValue(Double totalValue) {
+		this.totalValue = totalValue;
+	}
 	
 	public Customer getCustomer() {
 		return customer;
@@ -32,7 +40,7 @@ public class SalesOrder {
 	
 	@Override
 	public String toString() {
-		return "SalesOrder [customer=" + customer + ", items=" + items + ", createdAt=" + createdAt + "]";
+		return "SalesOrder [totalValue="+ totalValue +", customer=" + customer + ", createdAt=" + createdAt + "]";
 	}
 
 }

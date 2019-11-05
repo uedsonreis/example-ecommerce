@@ -52,7 +52,7 @@ public class CartController {
 		
 		if (cart.isEmpty()) {
 			result.setSuccess(false);
-			result.setMessage("There is no item in your shopping cart.");
+			result.setMessage(Util.getMsgNothingInCart());
 		} else {
 			result.setData(cart.values());
 		}

@@ -7,11 +7,11 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uedsonreis.ecommerce.entities.Item;
 import com.uedsonreis.ecommerce.entities.SalesOrder;
+import com.uedsonreis.ecommerce.entities.User;
 import com.uedsonreis.ecommerce.services.SalesOrderService;
 import com.uedsonreis.ecommerce.utils.ReturnType;
 import com.uedsonreis.ecommerce.utils.Util;
@@ -25,24 +25,26 @@ public class SalesOrderController {
 	private SalesOrderService salesOrderService;
 	
 	@RequestMapping("/invoice")
-	public ReturnType invoice(HttpSession httpSession, @RequestParam(value="customerId") Integer customerId) {
+	public ReturnType invoice(HttpSession httpSession) {
 		
 		@SuppressWarnings("unchecked")
 		Map<Integer, Item> cart = (Map<Integer, Item>) httpSession.getAttribute(Util.CART);
+		
+		User logged = (User) httpSession.getAttribute(Util.LOGGED);
 		
 		ReturnType result = new ReturnType();
 		
 		if (cart == null) {
 			result.setSuccess(false);
-			result.setMessage("There is no item in your shopping cart.");
+			result.setMessage(Util.getMsgNothingInCart());
 		} else {
-			Integer id = this.salesOrderService.invoice(cart, customerId);
+			SalesOrder salesOrder = this.salesOrderService.invoice(cart, logged);
 			
-			if (id == null) {
+			if (salesOrder == null) {
 				result.setSuccess(false);
-				result.setMessage("There are something wrong with the items or the customer id.");
+				result.setMessage(Util.getMsgCustomerOrItemInvalid());
 			} else {
-				result.setData(id);
+				result.setData(salesOrder);
 			}
 		}
 		
@@ -52,13 +54,15 @@ public class SalesOrderController {
 	@RequestMapping("/list")
 	public ReturnType login(HttpSession httpSession) {
 		
-		ReturnType result = new ReturnType();
+		User logged = (User) httpSession.getAttribute(Util.LOGGED);
 		
-		Collection<SalesOrder> salesOrders = this.salesOrderService.getSalesOrders();
+		Collection<SalesOrder> salesOrders = this.salesOrderService.getSalesOrders(logged);
+		
+		ReturnType result = new ReturnType();
 		
 		if (salesOrders.size() < 1) {
 			result.setSuccess(false);
-			result.setMessage("There is no sales order registered in database for you.");
+			result.setMessage(Util.getMsgNoSalesOrder());
 		} else {
 			result.setData(salesOrders);
 		}
