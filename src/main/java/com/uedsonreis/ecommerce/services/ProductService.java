@@ -27,6 +27,7 @@ public class ProductService {
 	}
 	
 	public Boolean remove(int id) {
+		if (id < 0 || id >= this.repository.size()) return false;
 		return (this.repository.remove(id) != null);
 	}
 	

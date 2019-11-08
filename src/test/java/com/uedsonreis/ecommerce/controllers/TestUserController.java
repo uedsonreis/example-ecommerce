@@ -2,10 +2,7 @@ package com.uedsonreis.ecommerce.controllers;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.SharedHttpSessionConfigurer.sharedHttpSession;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -17,10 +14,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.RequestBuilder;
-import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,16 +25,14 @@ import com.uedsonreis.ecommerce.entities.User;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class TestUserController {
-
+public class TestUserController extends ControllerTester {
+	
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	private MockMvc mockMvc;
-
 	@BeforeAll
-	void setup(WebApplicationContext wac) {
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).apply(sharedHttpSession()).build();
+	public void setup(WebApplicationContext wac) {
+		super.setup(wac);
 	}
 	
 	@Test
@@ -49,7 +40,7 @@ public class TestUserController {
 		
 		// Test verify a logged user
 		try {
-			this.test(get("/user/logged"), false, jsonPath("data").doesNotExist());
+			super.test(get("/user/logged"), false, jsonPath(RETURNED).doesNotExist());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -60,26 +51,26 @@ public class TestUserController {
 			wrong.setLogin("qualquer");
 			wrong.setPassword("123");
 			
-			this.test(
+			super.test(
 					get("/user/login").param("login", wrong.getLogin()).param("password", wrong.getPassword()),
-					false, jsonPath("data").doesNotExist());
+					false, jsonPath(RETURNED).doesNotExist());
 
-			this.test(
+			super.test(
 					post("/user/login").contentType("application/json").content(this.objectMapper.writeValueAsString(wrong)),
-					false, jsonPath("data").doesNotExist());
+					false, jsonPath(RETURNED).doesNotExist());
 
 			// Test to a registered user.
 			final User right = new User();
 			right.setLogin("admin");
 			right.setPassword("admin");
 
-			this.test(
+			super.test(
 					get("/user/login").param("login", right.getLogin()).param("password", right.getPassword()),
-					true, jsonPath("data").isString());
+					true, jsonPath(RETURNED).isString());
 			
-			this.test(
+			super.test(
 					post("/user/login").contentType("application/json").content(this.objectMapper.writeValueAsString(right)),
-					true, jsonPath("data").isString());
+					true, jsonPath(RETURNED).isString());
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -87,7 +78,7 @@ public class TestUserController {
 		
 		// Test verify a logged user again
 		try {
-			this.test(get("/user/logged"), true, jsonPath("data").isString());
+			super.test(get("/user/logged"), true, jsonPath(RETURNED).isString());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -109,47 +100,40 @@ public class TestUserController {
 		
 		try {
 			// Test to a incorrect age.
-			this.test(
+			super.test(
 					get("/user/customer/add")
 						.param("address", customer.getAddress())
 						.param("age", customer.getAge().toString())
 						.param("email", customer.getEmail())
 						.param("name", customer.getName())
 						.param("password", user.getPassword()),
-					false, jsonPath("data").doesNotExist());
+					false, jsonPath(RETURNED).doesNotExist());
 
-			this.test(
+			super.test(
 					post("/user/customer/add").contentType("application/json").content(this.objectMapper.writeValueAsString(customer)),
-					false, jsonPath("data").doesNotExist());
+					false, jsonPath(RETURNED).doesNotExist());
 
 			// Test to a correct age.
 			customer.setAge(37);
 			
-			this.test(
+			super.test(
 					get("/user/customer/add")
 						.param("address", customer.getAddress())
 						.param("age", customer.getAge().toString())
 						.param("email", customer.getEmail())
 						.param("name", customer.getName())
 						.param("password", user.getPassword()),
-					true, jsonPath("data").isNumber());
+					true, jsonPath(RETURNED).isNumber());
 
 			// Test to add the same customer.
-			this.test(
+			super.test(
 					post("/user/customer/add").contentType("application/json").content(this.objectMapper.writeValueAsString(customer)),
-					false, jsonPath("data").doesNotExist());
+					false, jsonPath(RETURNED).doesNotExist());
 			
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	private void test(RequestBuilder requestBuilder, Object success, ResultMatcher matcher) throws Exception {
-		this.mockMvc.perform(requestBuilder)
-			.andDo(print()).andExpect(status().isOk())
-			.andExpect(jsonPath("success").value(success))
-			.andExpect(matcher);
 	}
 
 }

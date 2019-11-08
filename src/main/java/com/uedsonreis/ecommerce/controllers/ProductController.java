@@ -5,6 +5,8 @@ import java.util.Collection;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,7 +25,7 @@ public class ProductController {
 	@Autowired
 	ProductService productService;
 	
-	@RequestMapping("/add")
+	@GetMapping("/add")
 	public ReturnType add(HttpSession httpSession,
 			@RequestParam(value="name") String name,
 			@RequestParam(value="factory") String factoryName,
@@ -38,6 +40,12 @@ public class ProductController {
 		product.setPrice(price);
 		product.setAmount(amount);
 		product.setFactory(factory);
+		
+		return this.add(httpSession, product);
+	}
+	
+	@RequestMapping("/add")
+	public ReturnType add(HttpSession httpSession, @RequestBody Product product) {
 		
 		ReturnType result = new ReturnType();
 		
@@ -75,7 +83,7 @@ public class ProductController {
 	}
 	
 	@RequestMapping("/list")
-	public ReturnType login() {
+	public ReturnType list() {
 		
 		ReturnType result = new ReturnType();
 		
