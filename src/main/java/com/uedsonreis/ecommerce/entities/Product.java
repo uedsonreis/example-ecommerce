@@ -2,10 +2,19 @@ package com.uedsonreis.ecommerce.entities;
 
 public class Product {
 
+	private Integer id;
+	
 	private String name;
 	private Double price;
 	private Integer amount;
 	private Factory factory;
+	
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
 	
 	public String getName() {
 		return name;
@@ -62,7 +71,7 @@ public class Product {
 
 	@Override
 	public String toString() {
-		return "Product [name=" + name + ", price=" + price + "]";
+		return "Product [id="+ id +", name=" + name + ", price=" + price + "]";
 	}
 	
 }

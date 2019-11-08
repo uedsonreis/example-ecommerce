@@ -21,7 +21,8 @@ public class CustomerService {
 		if (index >= 0) return null;
 		
 		if (this.repository.add(customer)) {
-			return this.repository.indexOf(customer);
+			customer.setId( this.repository.size() - 1 );
+			return customer.getId();
 		}
 		
 		return null;

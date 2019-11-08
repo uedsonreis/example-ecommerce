@@ -3,6 +3,9 @@ package com.uedsonreis.ecommerce.controllers;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,7 +44,7 @@ public class UserController {
 		return result;
 	}
 
-	@RequestMapping("/customer/add")
+	@GetMapping("/customer/add")
 	public ReturnType addCustomer(HttpSession httpSession,
 			@RequestParam(value="email") String email,
 			@RequestParam(value="name") String name,
@@ -60,6 +63,12 @@ public class UserController {
 		customer.setAddress(address);
 		customer.setUser(user);
 		
+		return this.addCustomer(httpSession, customer);
+	}
+	
+	@PostMapping("/customer/add")
+	public ReturnType addCustomer(HttpSession httpSession, @RequestBody Customer customer) {
+		
 		ReturnType result = new ReturnType();
 
 		Integer id = this.customerService.save(customer);
@@ -69,21 +78,26 @@ public class UserController {
 			result.setMessage(Util.getMsgEmailIsAlreadyRegistered());
 		} else {
 			result.setData(id);
-			httpSession.setAttribute(Util.LOGGED, user);
+			httpSession.setAttribute(Util.LOGGED, customer.getUser());
 		}
 		
 		return result;
 	}
 	
-	@RequestMapping("/login")
-	public ReturnType login(
-			HttpSession httpSession,
+	@GetMapping("/login")
+	public ReturnType login(HttpSession httpSession,
 			@RequestParam(value="login") String login,
-			@RequestParam(value="password") String password) {
+			@RequestParam(value="password") String password) { // Only for class example, don't do it in real life!
 		
 		User user = new User();
 		user.setLogin(login);
 		user.setPassword(password);
+		
+		return this.login(httpSession, user);
+	}
+	
+	@PostMapping("/login")
+	public ReturnType login(HttpSession httpSession, @RequestBody User user) {
 		
 		User logged = this.userService.login(user);
 

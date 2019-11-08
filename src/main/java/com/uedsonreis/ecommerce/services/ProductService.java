@@ -15,7 +15,8 @@ public class ProductService {
 	
 	public Integer save(Product product) {
 		if (this.repository.add(product)) {
-			return this.repository.indexOf(product);
+			product.setId( this.repository.size() - 1 );
+			return product.getId();
 		}
 		return null;
 	}

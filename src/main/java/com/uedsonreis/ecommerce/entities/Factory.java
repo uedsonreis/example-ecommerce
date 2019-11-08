@@ -1,8 +1,17 @@
 package com.uedsonreis.ecommerce.entities;
 
 public class Factory {
-
+	
+	private Integer id;
+	
 	private String name;
+	
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
 	
 	public String getName() {
 		return name;
@@ -38,7 +47,7 @@ public class Factory {
 
 	@Override
 	public String toString() {
-		return "Factory [name=" + name + "]";
+		return "Factory [id=" + id + ", name=" + name + "]";
 	}
 
 }

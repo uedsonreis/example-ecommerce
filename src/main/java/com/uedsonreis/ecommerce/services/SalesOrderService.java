@@ -47,6 +47,7 @@ public class SalesOrderService {
 		salesOrder.setTotalValue(totalValue);
 		
 		this.repository.add(salesOrder);
+		salesOrder.setId( this.repository.size() - 1 );
 		
 		return salesOrder;
 	}

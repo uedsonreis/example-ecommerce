@@ -1,12 +1,21 @@
 package com.uedsonreis.ecommerce.entities;
 
 public class Customer {
+	
+	private Integer id;
 
 	private String email;
 	private String name;
 	private Integer age;
 	private String address;
 	private User user;
+	
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
 	
 	public String getEmail() {
 		return email;
@@ -68,7 +77,7 @@ public class Customer {
 	
 	@Override
 	public String toString() {
-		return "Customer [email=" + email + ", name=" + name + ", age=" + age + "]";
+		return "Customer [id=" + id + ", email=" + email + ", name=" + name + ", age=" + age + "]";
 	}
 	
 }
