@@ -29,17 +29,28 @@ public class SalesOrderService {
 	public SalesOrder invoice(Map<Integer, Item> cart, User user) {
 		Double totalValue = 0.0;
 		
+		Customer customer = this.customerService.get(user);
+		if (customer == null) return null;
+		
 		for (Integer productId: cart.keySet()) {
 			Product product = this.productService.get(productId);
 			if (product == null) return null;
 			
 			Item item = cart.get(productId);
+			
+			if (product.getAmount() < item.getAmount()) return null;
+			
 			item.setProduct(product);
-			totalValue += item.getPrice() * item.getAmount();
 		}
 		
-		Customer customer = this.customerService.get(user);
-		if (customer == null) return null;
+		for (Item item: cart.values()) {
+			Product product = item.getProduct();
+			
+			product.setAmount( product.getAmount() - item.getAmount() );
+			totalValue += item.getPrice() * item.getAmount();
+			
+			this.productService.save(product);
+		}
 		
 		SalesOrder salesOrder = new SalesOrder();
 		salesOrder.setItems(new HashSet<>(cart.values()));

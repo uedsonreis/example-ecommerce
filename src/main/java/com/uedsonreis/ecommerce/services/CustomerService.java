@@ -3,6 +3,7 @@ package com.uedsonreis.ecommerce.services;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.uedsonreis.ecommerce.entities.Customer;
@@ -11,6 +12,9 @@ import com.uedsonreis.ecommerce.entities.User;
 @Service
 public class CustomerService {
 
+	@Autowired
+	private UserService userService;
+	
 	private final List<Customer> repository = new ArrayList<>();
 	
 	public Integer save(Customer customer) {
@@ -20,12 +24,18 @@ public class CustomerService {
 		
 		if (index >= 0) return null;
 		
-		if (this.repository.add(customer)) {
-			customer.setId( this.repository.size() - 1 );
-			return customer.getId();
+		customer.getUser().setLogin(customer.getEmail());
+		
+		if (!this.userService.add(customer.getUser())) {
+			return null;
+		}
+
+		if (!this.repository.add(customer)) {
+			return null;
 		}
 		
-		return null;
+		customer.setId( this.repository.size() - 1 );
+		return customer.getId();
 	}
 	
 	public Customer get(User user) {

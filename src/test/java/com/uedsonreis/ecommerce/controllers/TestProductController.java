@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uedsonreis.ecommerce.entities.Factory;
 import com.uedsonreis.ecommerce.entities.Product;
 import com.uedsonreis.ecommerce.entities.User;
+import com.uedsonreis.ecommerce.services.ProductService;
 
 @ActiveProfiles("test")
 @TestInstance(Lifecycle.PER_CLASS)
@@ -32,21 +33,38 @@ public class TestProductController extends ControllerTester {
 
 	@Autowired
 	private ObjectMapper objectMapper;
+	
+	@Autowired
+	private ProductService productService;
 
 	@BeforeAll
 	public void setup(WebApplicationContext wac) {
 		super.setup(wac);
 	}
 	
+	@BeforeAll
+	public void addSomeProducts() {
+		Factory microsoft = new Factory();
+		microsoft.setName("Microsoft");
+		
+		Product nootebook = new Product();
+		nootebook.setAmount(5);
+		nootebook.setName("Microsoft Notebook");
+		nootebook.setPrice(6399.0);
+		nootebook.setFactory(microsoft);
+		
+		this.productService.save(nootebook);
+	}
+	
 	@Test
 	public void testAll() {
-		this.testNotAddProduct();
+		this.testNotLogged();
 		this.testAddProduct();
 		this.testListProducts();
 		this.testRemoveProduct();
 	}
 	
-	private void testNotAddProduct() {
+	private void testNotLogged() {
 		try {
 			Factory apple = new Factory();
 			apple.setName("Apple Inc.");
@@ -119,14 +137,17 @@ public class TestProductController extends ControllerTester {
 	}
 	
 	private void testRemoveProduct() {
+		
+		Integer beyond = this.productService.getProducts().size();
+		
 		try {
-			this.mockMvc.perform(get("/product/remove").param("id", "1"))
+			this.mockMvc.perform(get("/product/remove").param("id", "0"))
 				.andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath("success").value(true));
+				.andExpect(jsonPath(SUCCESS).value(true));
 			
-			this.mockMvc.perform(get("/product/remove").param("id", "35"))
+			this.mockMvc.perform(get("/product/remove").param("id", beyond.toString()))
 				.andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath("success").value(false));
+				.andExpect(jsonPath(SUCCESS).value(false));
 			
 		} catch (Exception e) {
 			e.printStackTrace();

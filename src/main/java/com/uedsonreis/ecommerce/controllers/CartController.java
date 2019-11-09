@@ -27,12 +27,13 @@ public class CartController {
 			@RequestParam(value="price") Double price,
 			@RequestParam(value="amount") Integer amount) {
 		
+		Product product = new Product();
+		product.setId(productId);
+		
 		Item item = new Item();
 		item.setPrice(price);
 		item.setAmount(amount);
-		
-		Product product = new Product();
-		product.setId(productId);
+		item.setProduct(product);
 		
 		return this.add(httpSession, item);
 	}

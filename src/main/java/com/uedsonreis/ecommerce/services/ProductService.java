@@ -14,6 +14,15 @@ public class ProductService {
 	private final List<Product> repository = new ArrayList<>();
 	
 	public Integer save(Product product) {
+		if (product.getId() != null) {
+			Product saved = this.get(product.getId());
+			
+			saved.setAmount( product.getAmount() );
+			saved.setPrice( product.getPrice() );
+			
+			return product.getId();
+		}
+		
 		if (this.repository.add(product)) {
 			product.setId( this.repository.size() - 1 );
 			return product.getId();

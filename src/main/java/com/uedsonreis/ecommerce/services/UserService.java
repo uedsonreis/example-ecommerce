@@ -20,6 +20,14 @@ public class UserService {
 		this.repository.add(admin);
 	}
 	
+	protected boolean add(User user) {
+		if (this.repository.contains(user)) {
+			return false;
+		} else {
+			return this.repository.add(user);
+		}
+	}
+	
 	public User login(User user) {
 		
 		int index = this.repository.indexOf(user);

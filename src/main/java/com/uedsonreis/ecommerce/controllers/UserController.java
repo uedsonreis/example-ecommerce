@@ -53,7 +53,6 @@ public class UserController {
 			@RequestParam(value="password") String password) {
 
 		User user = new User();
-		user.setLogin(email);
 		user.setPassword(password);
 		
 		Customer customer = new Customer();

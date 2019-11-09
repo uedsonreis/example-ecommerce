@@ -14,6 +14,7 @@ import org.springframework.web.context.WebApplicationContext;
 public class ControllerTester {
 
 	public static final String RETURNED = "data";
+	public static final String SUCCESS = "success";
 	
 	protected MockMvc mockMvc;
 	
@@ -24,7 +25,7 @@ public class ControllerTester {
 	protected void test(RequestBuilder requestBuilder, Object success, ResultMatcher matcher) throws Exception {
 		this.mockMvc.perform(requestBuilder)
 			.andDo(print()).andExpect(status().isOk())
-			.andExpect(jsonPath("success").value(success))
+			.andExpect(jsonPath(SUCCESS).value(success))
 			.andExpect(matcher);
 	}
 

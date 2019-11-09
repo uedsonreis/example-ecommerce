@@ -6,8 +6,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Collection;
-
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -23,34 +21,96 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.uedsonreis.ecommerce.entities.Factory;
 import com.uedsonreis.ecommerce.entities.Item;
 import com.uedsonreis.ecommerce.entities.Product;
+import com.uedsonreis.ecommerce.entities.User;
+import com.uedsonreis.ecommerce.services.ProductService;
 
 @ActiveProfiles("test")
 @TestInstance(Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class TestCartController extends ControllerTester {
+public class TestSalesControllers extends ControllerTester {
 
 	@Autowired
 	private ObjectMapper objectMapper;
+	
+	@Autowired
+	private ProductService productService;
 
 	@BeforeAll
 	public void setup(WebApplicationContext wac) {
 		super.setup(wac);
 	}
 	
-	@SuppressWarnings("unchecked")
+	@BeforeAll
+	public void addSomeProducts() {
+		Factory apple = new Factory();
+		apple.setName("Apple Inc.");
+		
+		Product macBook = new Product();
+		macBook.setAmount(5);
+		macBook.setName("MackBook Pro");
+		macBook.setPrice(14399.0);
+		macBook.setFactory(apple);
+		
+		Product iPhone = new Product();
+		iPhone.setAmount(10);
+		iPhone.setName("iPhone 11");
+		iPhone.setPrice(4399.0);
+		iPhone.setFactory(apple);
+		
+		this.productService.save(macBook);
+		this.productService.save(iPhone);
+	}
+	
+	private void testInvoice() throws Exception {
+		
+		User user = new User();
+		user.setLogin("uedson@reis.com");
+		user.setPassword("321");
+		
+//		When run only this test class
+
+//		Customer customer = new Customer();
+//		customer.setAge(37);
+//		customer.setUser(user);
+//		customer.setName("Uedson Reis");
+//		customer.setEmail(user.getLogin());
+//		customer.setAddress("Rua Fulano de Tal, n. 13");
+//		
+//		super.test(
+//				get("/user/customer/add")
+//					.param("address", customer.getAddress())
+//					.param("age", customer.getAge().toString())
+//					.param("email", customer.getEmail())
+//					.param("name", customer.getName())
+//					.param("password", user.getPassword()),
+//				true, jsonPath(RETURNED).isNumber());
+		
+//		When run all test classes
+		super.test(
+				post("/user/login").contentType("application/json").content(this.objectMapper.writeValueAsString(user)),
+				true, jsonPath(RETURNED).isString());
+		
+		super.test(post("/sales/order/invoice"), true, jsonPath(RETURNED).exists());
+	}
+	
 	private void testAddInCart() throws Exception {
 		ResultActions result = this.mockMvc.perform(get("/product/list"))
 			.andDo(print()).andExpect(status().isOk())
-			.andExpect(jsonPath("success").value(true))
+			.andExpect(jsonPath(SUCCESS).value(true))
 			.andExpect(jsonPath(RETURNED).isArray());
-			
-		Collection<Product> products = (Collection<Product>) new JSONObject(result.andReturn().getResponse().getContentAsString()).get("data");
 		
-		Product product1 = products.iterator().next();
+		String content = result.andReturn().getResponse().getContentAsString();
+		
+		Object data = objectMapper.readValue(new JSONObject(content).get(RETURNED).toString(), Product[].class);
+			
+		Product[] products = (Product[]) data;
+		
+		Product product1 = products[0];
 		
 		super.test(
 				get("/cart/add")
@@ -59,7 +119,7 @@ public class TestCartController extends ControllerTester {
 					.param("price", product1.getPrice().toString()),
 				true, jsonPath(RETURNED).doesNotExist());
 		
-		Product product2 = products.iterator().next();
+		Product product2 = products[1];
 		
 		Item item = new Item();
 		item.setAmount(2);
@@ -72,13 +132,22 @@ public class TestCartController extends ControllerTester {
 	}
 	
 	@Test
-	public void testAll() {
+	public void testCart() {
 		try {
 			super.test(get("/cart/list"), false, jsonPath(RETURNED).doesNotExist());
-			
 			this.testAddInCart();
-			
 			super.test(get("/cart/list"), true, jsonPath(RETURNED).isArray());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Test
+	public void testSalesOrder() {
+		try {
+			super.test(get("/sales/order/list"), false, jsonPath(RETURNED).doesNotExist());
+			this.testInvoice();
+			super.test(get("/sales/order/list"), true, jsonPath(RETURNED).isArray());
 
 		} catch (Exception e) {
 			e.printStackTrace();

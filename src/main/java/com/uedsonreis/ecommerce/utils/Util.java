@@ -5,16 +5,16 @@ public class Util {
 	public static final String CART = "cart";
 	public static final String LOGGED = "logged";
 	
-	public static String getMsgCustomerOrItemInvalid() {
-		return "There are something wrong with the items or the customer id.";
-	}
-	
 	public static String getMsgEmailIsAlreadyRegistered() {
 		return "This email is already registered.";
 	}
 	
 	public static String getMsgIdIsNotRegistered() {
 		return "This ID is not registered in database.";
+	}
+
+	public static String getMsgItemInvalid() {
+		return "There are something wrong with the items.";
 	}
 	
 	public static String getMsgLoginOrPasswordInvalid() {
