@@ -1,44 +1,28 @@
 package com.uedsonreis.ecommerce.services;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.uedsonreis.ecommerce.entities.User;
+import com.uedsonreis.ecommerce.repositories.UserRepository;
 
 @Service
 public class UserService {
 
-	private final List<User> repository = new ArrayList<>();
-	
-	public UserService() {
-		User admin = new User();
-		admin.setAdmin(true);
-		admin.setLogin("admin");
-		admin.setPassword("admin");
-		this.repository.add(admin);
-	}
-	
-	protected boolean add(User user) {
-		if (this.repository.contains(user)) {
-			return false;
-		} else {
-			return this.repository.add(user);
-		}
-	}
+	@Autowired
+	private UserRepository repository;
 	
 	public User login(User user) {
 		
-		int index = this.repository.indexOf(user);
-		if (index < 0) return null;
+		User userDB = this.repository.findByLogin(user.getLogin());
 		
-		User userDB = this.repository.get(index);
+		if (userDB == null) return null;
 		
-		if (userDB.getPassword().equals(user.getPassword())) {
-			return userDB;
+		if (!userDB.getPassword().equals(user.getPassword())) {
+			return null;
 		}
-		return null;
+		
+		return userDB;
 	}
 
 }

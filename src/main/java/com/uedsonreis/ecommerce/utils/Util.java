@@ -5,6 +5,10 @@ public class Util {
 	public static final String CART = "cart";
 	public static final String LOGGED = "logged";
 	
+	public static String getMsgCustomerDoesntExists() {
+		return "Customer doesn't exists.";
+	}
+	
 	public static String getMsgEmailIsAlreadyRegistered() {
 		return "This email is already registered.";
 	}

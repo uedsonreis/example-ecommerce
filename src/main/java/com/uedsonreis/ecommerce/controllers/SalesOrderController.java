@@ -37,20 +37,22 @@ public class SalesOrderController {
 		if (cart == null) {
 			result.setSuccess(false);
 			result.setMessage(Util.getMsgNothingInCart());
+			
 		} else if (logged == null) {
 			result.setSuccess(false);
 			result.setMessage(Util.getMsgYouNeedLogIn());
-		} else {
-			SalesOrder salesOrder = this.salesOrderService.invoice(cart, logged);
 			
-			if (salesOrder == null) {
-				result.setSuccess(false);
-				result.setMessage(Util.getMsgItemInvalid());
-			} else {
+		} else {
+			try {
+				SalesOrder salesOrder = this.salesOrderService.invoice(cart, logged);
 				result.setData(salesOrder);
+				
+			} catch (Exception e) {
+//				e.printStackTrace();
+				result.setSuccess(false);
+				result.setMessage(e.getMessage());
 			}
 		}
-		
 		return result;
 	}
 	

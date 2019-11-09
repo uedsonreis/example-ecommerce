@@ -1,57 +1,51 @@
 package com.uedsonreis.ecommerce.services;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.uedsonreis.ecommerce.entities.Customer;
 import com.uedsonreis.ecommerce.entities.User;
+import com.uedsonreis.ecommerce.repositories.CustomerRepository;
 
 @Service
 public class CustomerService {
-
-	@Autowired
-	private UserService userService;
 	
-	private final List<Customer> repository = new ArrayList<>();
+	@Autowired
+	private CustomerRepository repository;
 	
 	public Integer save(Customer customer) {
+		if (customer.getEmail() == null) return null;
+		if (customer.getName() == null) return null;
+		if (customer.getAge() == null) return null;
+		if (customer.getUser() == null) return null;
+		
 		if (customer.getAge() < 18) return null;
+		if (customer.getUser().getPassword() == null) return null;
 		
-		int index = this.repository.indexOf(customer);
+		Customer customerDB = this.repository.findByEmail(customer.getEmail());
 		
-		if (index >= 0) return null;
+		if (customerDB != null) return null;
 		
 		customer.getUser().setLogin(customer.getEmail());
+		customer.getUser().setAdmin(false);
 		
-		if (!this.userService.add(customer.getUser())) {
-			return null;
-		}
+		customerDB = this.repository.save(customer);
 
-		if (!this.repository.add(customer)) {
-			return null;
-		}
+		if (customerDB == null) return null;
 		
-		customer.setId( this.repository.size() - 1 );
-		return customer.getId();
+		return customerDB.getId();
 	}
 	
 	public Customer get(User user) {
-		
-		for (Customer customer: this.repository) {
-			if (customer.getUser().equals(user)) {
-				return customer;
-			}
-		}
-		
-		return null;
+		return this.repository.findByUser(user);
 	}
 
 	public Customer get(Integer id) {
-		if (id < 0 || id >= this.repository.size()) return null;
-		return this.repository.get(id);
+		Optional<Customer> optional = this.repository.findById(id);
+		if (optional.isEmpty()) return null;
+		return optional.get();
 	}
 
 }

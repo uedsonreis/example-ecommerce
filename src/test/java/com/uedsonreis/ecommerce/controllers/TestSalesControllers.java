@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.json.JSONObject;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -21,11 +22,15 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.uedsonreis.ecommerce.entities.Customer;
 import com.uedsonreis.ecommerce.entities.Factory;
 import com.uedsonreis.ecommerce.entities.Item;
 import com.uedsonreis.ecommerce.entities.Product;
+import com.uedsonreis.ecommerce.entities.SalesOrder;
 import com.uedsonreis.ecommerce.entities.User;
+import com.uedsonreis.ecommerce.repositories.CustomerRepository;
 import com.uedsonreis.ecommerce.services.ProductService;
+import com.uedsonreis.ecommerce.services.SalesOrderService;
 
 @ActiveProfiles("test")
 @TestInstance(Lifecycle.PER_CLASS)
@@ -38,7 +43,15 @@ public class TestSalesControllers extends ControllerTester {
 	private ObjectMapper objectMapper;
 	
 	@Autowired
+	private CustomerRepository customerRepository;
+	
+	@Autowired
+	private SalesOrderService salesOrderService;
+	
+	@Autowired
 	private ProductService productService;
+	
+	private Integer idsToDelete[] = new Integer[4];
 
 	@BeforeAll
 	public void setup(WebApplicationContext wac) {
@@ -62,8 +75,16 @@ public class TestSalesControllers extends ControllerTester {
 		iPhone.setPrice(4399.0);
 		iPhone.setFactory(apple);
 		
-		this.productService.save(macBook);
-		this.productService.save(iPhone);
+		this.idsToDelete[0] = this.productService.save(macBook);
+		this.idsToDelete[1] = this.productService.save(iPhone);
+	}
+	
+	@AfterAll
+	public void removeSameProducts() {
+		this.productService.remove(this.idsToDelete[0]);
+		this.productService.remove(this.idsToDelete[1]);
+		this.salesOrderService.remove(this.idsToDelete[3]);
+		this.customerRepository.deleteById(this.idsToDelete[2]);
 	}
 	
 	private void testInvoice() throws Exception {
@@ -72,30 +93,31 @@ public class TestSalesControllers extends ControllerTester {
 		user.setLogin("uedson@reis.com");
 		user.setPassword("321");
 		
-//		When run only this test class
-
-//		Customer customer = new Customer();
-//		customer.setAge(37);
-//		customer.setUser(user);
-//		customer.setName("Uedson Reis");
-//		customer.setEmail(user.getLogin());
-//		customer.setAddress("Rua Fulano de Tal, n. 13");
-//		
-//		super.test(
-//				get("/user/customer/add")
-//					.param("address", customer.getAddress())
-//					.param("age", customer.getAge().toString())
-//					.param("email", customer.getEmail())
-//					.param("name", customer.getName())
-//					.param("password", user.getPassword()),
-//				true, jsonPath(RETURNED).isNumber());
+		Customer customer = new Customer();
+		customer.setAge(37);
+		customer.setUser(user);
+		customer.setName("Uedson Reis");
+		customer.setEmail(user.getLogin());
+		customer.setAddress("Rua Fulano de Tal, n. 13");
 		
-//		When run all test classes
-		super.test(
-				post("/user/login").contentType("application/json").content(this.objectMapper.writeValueAsString(user)),
-				true, jsonPath(RETURNED).isString());
+		ResultActions result = super.test(
+				get("/user/customer/add")
+					.param("address", customer.getAddress())
+					.param("age", customer.getAge().toString())
+					.param("email", customer.getEmail())
+					.param("name", customer.getName())
+					.param("password", user.getPassword()),
+				true, jsonPath(RETURNED).isNumber());
 		
-		super.test(post("/sales/order/invoice"), true, jsonPath(RETURNED).exists());
+		String content = result.andReturn().getResponse().getContentAsString();
+		Object data = objectMapper.readValue(new JSONObject(content).get(RETURNED).toString(), Integer.class);
+		this.idsToDelete[2] = (Integer) data;
+		
+		result = super.test(post("/sales/order/invoice"), true, jsonPath(RETURNED).exists());
+		
+		content = result.andReturn().getResponse().getContentAsString();
+		data = objectMapper.readValue(new JSONObject(content).get(RETURNED).toString(), SalesOrder.class);
+		this.idsToDelete[3] = ((SalesOrder) data).getId();
 	}
 	
 	private void testAddInCart() throws Exception {

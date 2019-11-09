@@ -1,12 +1,30 @@
 package com.uedsonreis.ecommerce.entities;
 
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+
+@Entity
 public class Item {
 	
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Integer id;
 
 	private Double price;
 	private Integer amount;
+	
+	@OneToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "product_id", nullable = false)
 	private Product product;
+	
+	@OneToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "sales_order_id", nullable = false)
+	private SalesOrder salesOrder;
 	
 	public Integer getId() {
 		return id;
@@ -34,6 +52,13 @@ public class Item {
 	}
 	public void setProduct(Product product) {
 		this.product = product;
+	}
+	
+	public SalesOrder getSalesOrder() {
+		return salesOrder;
+	}
+	public void setSalesOrder(SalesOrder salesOrder) {
+		this.salesOrder = salesOrder;
 	}
 	
 	@Override

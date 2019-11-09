@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -16,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,6 +38,8 @@ public class TestProductController extends ControllerTester {
 	
 	@Autowired
 	private ProductService productService;
+	
+	private Integer idsToDelete[] = new Integer[2];
 
 	@BeforeAll
 	public void setup(WebApplicationContext wac) {
@@ -111,7 +115,7 @@ public class TestProductController extends ControllerTester {
 			iPhone.setPrice(4399.0);
 			iPhone.setFactory(apple);
 			
-			super.test(
+			ResultActions result = super.test(
 					get("/product/add")
 						.param("amount", iPhone.getAmount().toString())
 						.param("factory", apple.getName())
@@ -119,9 +123,21 @@ public class TestProductController extends ControllerTester {
 						.param("price", iPhone.getPrice().toString()),
 					true, jsonPath(RETURNED).isNumber());
 
-			super.test(
+			String content = result.andReturn().getResponse().getContentAsString();
+			
+			Object data = objectMapper.readValue(new JSONObject(content).get(RETURNED).toString(), Integer.class);
+				
+			this.idsToDelete[0] = (Integer) data;
+			
+			result = super.test(
 					post("/product/add").contentType("application/json").content(this.objectMapper.writeValueAsString(iPhone)),
 					true, jsonPath(RETURNED).isNumber());
+			
+			content = result.andReturn().getResponse().getContentAsString();
+			
+			data = objectMapper.readValue(new JSONObject(content).get(RETURNED).toString(), Integer.class);
+				
+			this.idsToDelete[1] = (Integer) data;
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -137,15 +153,16 @@ public class TestProductController extends ControllerTester {
 	}
 	
 	private void testRemoveProduct() {
-		
-		Integer beyond = this.productService.getProducts().size();
-		
 		try {
-			this.mockMvc.perform(get("/product/remove").param("id", "0"))
+			this.mockMvc.perform(get("/product/remove").param("id", this.idsToDelete[0].toString()))
 				.andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath(SUCCESS).value(true));
 			
-			this.mockMvc.perform(get("/product/remove").param("id", beyond.toString()))
+			this.mockMvc.perform(get("/product/remove").param("id", this.idsToDelete[1].toString()))
+				.andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath(SUCCESS).value(true));
+			
+			this.mockMvc.perform(get("/product/remove").param("id", "-1"))
 				.andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath(SUCCESS).value(false));
 			

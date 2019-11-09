@@ -1,12 +1,26 @@
 package com.uedsonreis.ecommerce.entities;
 
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+
+@Entity
 public class Product {
 
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Integer id;
 	
 	private String name;
 	private Double price;
 	private Integer amount;
+	
+	@OneToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "factory_id", nullable = false)
 	private Factory factory;
 	
 	public Integer getId() {

@@ -88,12 +88,21 @@ public class TestSalesOrderService {
 		
 		cart.put(this.product.getId(), item);
 		
-		SalesOrder salesOrder = this.salesOrderService.invoice(cart, this.user);
+		SalesOrder salesOrder = null;
+		try {
+			salesOrder = this.salesOrderService.invoice(cart, this.user);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		assertEquals(true, salesOrder == null);
 		
 		item.setAmount(1);
 		
-		salesOrder = this.salesOrderService.invoice(cart, this.user);
+		try {
+			salesOrder = this.salesOrderService.invoice(cart, this.user);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		assertEquals(true, salesOrder != null);
 	}
 	
