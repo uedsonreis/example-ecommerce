@@ -29,6 +29,7 @@ import com.uedsonreis.ecommerce.entities.Product;
 import com.uedsonreis.ecommerce.entities.SalesOrder;
 import com.uedsonreis.ecommerce.entities.User;
 import com.uedsonreis.ecommerce.repositories.CustomerRepository;
+import com.uedsonreis.ecommerce.repositories.ItemRepository;
 import com.uedsonreis.ecommerce.services.ProductService;
 import com.uedsonreis.ecommerce.services.SalesOrderService;
 
@@ -41,6 +42,9 @@ public class TestSalesControllers extends ControllerTester {
 
 	@Autowired
 	private ObjectMapper objectMapper;
+	
+	@Autowired
+	private ItemRepository itemRepository;
 	
 	@Autowired
 	private CustomerRepository customerRepository;
@@ -81,10 +85,11 @@ public class TestSalesControllers extends ControllerTester {
 	
 	@AfterAll
 	public void removeSameProducts() {
-		this.productService.remove(this.idsToDelete[0]);
-		this.productService.remove(this.idsToDelete[1]);
+		this.itemRepository.deleteAll();
 		this.salesOrderService.remove(this.idsToDelete[3]);
 		this.customerRepository.deleteById(this.idsToDelete[2]);
+		this.productService.remove(this.idsToDelete[0]);
+		this.productService.remove(this.idsToDelete[1]);
 	}
 	
 	private void testInvoice() throws Exception {

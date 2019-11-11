@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -23,6 +24,10 @@ import com.uedsonreis.ecommerce.entities.Item;
 import com.uedsonreis.ecommerce.entities.Product;
 import com.uedsonreis.ecommerce.entities.SalesOrder;
 import com.uedsonreis.ecommerce.entities.User;
+import com.uedsonreis.ecommerce.repositories.CustomerRepository;
+import com.uedsonreis.ecommerce.repositories.ItemRepository;
+import com.uedsonreis.ecommerce.repositories.ProductRepository;
+import com.uedsonreis.ecommerce.repositories.SalesOrderRepository;
 
 @ActiveProfiles("test")
 @TestInstance(Lifecycle.PER_CLASS)
@@ -33,6 +38,18 @@ public class TestSalesOrderService {
 	
 	private final User user = new User();
 	private final Product product = new Product();
+	
+	@Autowired
+	private CustomerRepository customerRepository;
+	
+	@Autowired
+	private ProductRepository productRepository;
+	
+	@Autowired
+	private ItemRepository itemRepository;
+	
+	@Autowired
+	private SalesOrderRepository salesOrderRepository;
 	
 	@Autowired
 	private ProductService productService;
@@ -71,6 +88,14 @@ public class TestSalesOrderService {
 		this.customerService.save(customer);
 	}
 	
+	@AfterAll
+	public void clearDatabase() {
+		this.itemRepository.deleteAll();
+		this.salesOrderRepository.deleteAll();
+		this.customerRepository.deleteAll();
+		this.productRepository.deleteAll();
+	}
+	
 	private void testNotList() {
 		Collection<SalesOrder> sales = this.salesOrderService.getSalesOrders(this.user);
 		
@@ -92,7 +117,7 @@ public class TestSalesOrderService {
 		try {
 			salesOrder = this.salesOrderService.invoice(cart, this.user);
 		} catch (Exception e) {
-			e.printStackTrace();
+			// e.printStackTrace(); If catch here is because have passed in the test.
 		}
 		assertEquals(true, salesOrder == null);
 		
@@ -104,6 +129,15 @@ public class TestSalesOrderService {
 			e.printStackTrace();
 		}
 		assertEquals(true, salesOrder != null);
+	}
+	
+	private void testAmountProduct() {
+		try {
+			Product productDB = this.productRepository.findById(this.product.getId()).get();
+			assertEquals(true, 4 == productDB.getAmount());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private void testList() {
@@ -118,6 +152,7 @@ public class TestSalesOrderService {
 		this.testNotList();
 		this.testInvoice();
 		this.testList();
+		this.testAmountProduct();
 	}
 	
 }
