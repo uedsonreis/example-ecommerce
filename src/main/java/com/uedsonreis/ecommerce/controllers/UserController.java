@@ -52,15 +52,8 @@ public class UserController {
 			@RequestParam(value="address") String address,
 			@RequestParam(value="password") String password) {
 
-		User user = new User();
-		user.setPassword(password);
-		
-		Customer customer = new Customer();
-		customer.setEmail(email);
-		customer.setName(name);
-		customer.setAge(age);
-		customer.setAddress(address);
-		customer.setUser(user);
+		User user = User.builder().password(password).build();
+		Customer customer = Customer.builder().email(email).name(name).age(age).address(address).user(user).build();
 		
 		return this.addCustomer(httpSession, customer);
 	}
@@ -88,9 +81,7 @@ public class UserController {
 			@RequestParam(value="login") String login,
 			@RequestParam(value="password") String password) { // Only for class example, don't do it in real life!
 		
-		User user = new User();
-		user.setLogin(login);
-		user.setPassword(password);
+		User user = User.builder().login(login).password(password).build();
 		
 		return this.login(httpSession, user);
 	}

@@ -27,13 +27,8 @@ public class CartController {
 			@RequestParam(value="price") Double price,
 			@RequestParam(value="amount") Integer amount) {
 		
-		Product product = new Product();
-		product.setId(productId);
-		
-		Item item = new Item();
-		item.setPrice(price);
-		item.setAmount(amount);
-		item.setProduct(product);
+		Product product = Product.builder().id(productId).build();
+		Item item = Item.builder().price(price).amount(amount).product(product).build();
 		
 		return this.add(httpSession, item);
 	}

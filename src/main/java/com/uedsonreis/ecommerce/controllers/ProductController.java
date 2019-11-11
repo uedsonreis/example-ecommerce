@@ -32,14 +32,8 @@ public class ProductController {
 			@RequestParam(value="price") Double price,
 			@RequestParam(value="amount") Integer amount) {
 		
-		Factory factory = new Factory();
-		factory.setName(factoryName);
-
-		Product product = new Product();
-		product.setName(name);
-		product.setPrice(price);
-		product.setAmount(amount);
-		product.setFactory(factory);
+		Factory factory = Factory.builder().name(factoryName).build();
+		Product product = Product.builder().name(name).price(price).amount(amount).factory(factory).build();
 		
 		return this.add(httpSession, product);
 	}

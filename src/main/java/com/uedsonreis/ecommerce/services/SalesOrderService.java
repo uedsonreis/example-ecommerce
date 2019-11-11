@@ -58,9 +58,7 @@ public class SalesOrderService {
 		
 		Double totalValue = 0.0;
 		
-		SalesOrder salesOrder = new SalesOrder();
-		salesOrder.setCustomer(customer);
-		
+		SalesOrder salesOrder = SalesOrder.builder().customer(customer).build();		
 		this.salesOrderRepository.save(salesOrder);
 		
 		for (Item item: cart.values()) {
@@ -75,18 +73,20 @@ public class SalesOrderService {
 			this.itemRepository.save(item);
 		}
 		
-//		salesOrder.setItems(new HashSet<>(cart.values()));
-		
 		return salesOrder;
 	}
 	
+	public Set<Item> getItems(Integer salesOrderId) {
+		SalesOrder salesOrder = SalesOrder.builder().id(salesOrderId).build();
+		return this.itemRepository.findAllBySalesOrder(salesOrder);
+	}
+
+	@Transactional
 	public void remove(Integer id) {
-		SalesOrder salesOrder = new SalesOrder();
-		salesOrder.setId(id);
+		SalesOrder salesOrder = SalesOrder.builder().id(id).build();
 		Set<Item> items = this.itemRepository.findAllBySalesOrder(salesOrder);
 		
 		this.itemRepository.deleteAll(items);
-		
 		this.salesOrderRepository.deleteById(id);
 	}
 	

@@ -45,10 +45,9 @@ public class SalesOrderController {
 		} else {
 			try {
 				SalesOrder salesOrder = this.salesOrderService.invoice(cart, logged);
-				result.setData(salesOrder);
+				result.setData( salesOrder );
 				
 			} catch (Exception e) {
-//				e.printStackTrace();
 				result.setSuccess(false);
 				result.setMessage(e.getMessage());
 			}
