@@ -6,9 +6,10 @@
 	
 	<groupId>com.uedsonreis</groupId>
 	<artifactId>example-ecommerce</artifactId>
-	<version>0.0.1</version>
 	<name>Example Ecommerce</name>
 	<description>Ecommerce Example for programming classes.</description>
+	<version>0.0.1</version>
+	<packaging>jar</packaging>
 	
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -17,8 +18,11 @@
 	</parent>
 	
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>1.8</java.version>
+		<java.version>1.8</java.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+	    <maven.compiler.target>1.8</maven.compiler.target>
+	    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 	
 	<dependencies>
