@@ -1,1 +1,1 @@
-web: java $JAVA_OPTS -jar target/example-ecommerce-0.0.1.jar --port $PORT
+web: java -Dserver.port=$PORT $JAVA_OPTS -jar target/*.jar
