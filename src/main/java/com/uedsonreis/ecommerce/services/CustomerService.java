@@ -1,7 +1,5 @@
 package com.uedsonreis.ecommerce.services;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,9 +41,7 @@ public class CustomerService {
 	}
 
 	public Customer get(Integer id) {
-		Optional<Customer> optional = this.repository.findById(id);
-		if (optional.isEmpty()) return null;
-		return optional.get();
+		return this.repository.findById(id).get();
 	}
 
 }
