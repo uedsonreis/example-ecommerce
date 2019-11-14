@@ -3,6 +3,7 @@ package com.uedsonreis.ecommerce.controllers;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +18,7 @@ import com.uedsonreis.ecommerce.services.UserService;
 import com.uedsonreis.ecommerce.utils.ReturnType;
 import com.uedsonreis.ecommerce.utils.Util;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("user")
 public class UserController {
