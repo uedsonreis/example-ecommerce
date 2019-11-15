@@ -44,7 +44,7 @@ public class Application {
 		
 		if (factories == null || factories.isEmpty()) {
 			Factory apple = new Factory();
-			apple.setName("Apple Inc.");
+			apple.setName("Apple");
 			
 			Factory samsung = new Factory();
 			samsung.setName("Samsung");
