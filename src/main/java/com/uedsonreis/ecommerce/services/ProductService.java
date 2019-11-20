@@ -1,6 +1,7 @@
 package com.uedsonreis.ecommerce.services;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import javax.transaction.Transactional;
 
@@ -41,8 +42,9 @@ public class ProductService {
 	}
 	
 	public Boolean remove(int id) {
-		Product product = this.repository.findById(id).get();
-		if (product == null) return false;
+		Optional<Product> product = this.repository.findById(id);
+		if (product.isEmpty()) return false;
+		
 		this.repository.deleteById(id);
 		return true;
 	}

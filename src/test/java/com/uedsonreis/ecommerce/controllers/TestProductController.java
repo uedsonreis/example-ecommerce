@@ -1,12 +1,14 @@
 package com.uedsonreis.ecommerce.controllers;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -79,9 +81,12 @@ public class TestProductController extends ControllerTester {
 			macBook.setPrice(14399.0);
 			macBook.setFactory(apple);
 			
-			super.test(
+			ResultActions result = super.test(
 					post("/product/add").contentType("application/json").content(this.objectMapper.writeValueAsString(macBook)),
-					false, jsonPath(RETURNED).doesNotExist());
+					status().isUnauthorized());
+			
+			String content = result.andReturn().getResponse().getContentAsString();
+			assertEquals("", content);
 			
 			super.test(
 					get("/product/add")
@@ -89,7 +94,7 @@ public class TestProductController extends ControllerTester {
 						.param("factory", apple.getName())
 						.param("name", macBook.getName())
 						.param("price", macBook.getPrice().toString()),
-					false, jsonPath(RETURNED).doesNotExist());
+					status().isUnauthorized());
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -102,9 +107,12 @@ public class TestProductController extends ControllerTester {
 			admin.setLogin("admin");
 			admin.setPassword("admin");
 			
-			super.test(
+			ResultActions result = super.test(
 					get("/user/login").param("login", admin.getLogin()).param("password", admin.getPassword()),
-					true, jsonPath(RETURNED).isString());
+					status().isOk());
+			
+			String content = result.andReturn().getResponse().getContentAsString();
+			assertEquals(admin.getLogin(), content);
 			
 			Factory apple = new Factory();
 			apple.setName("Apple Inc.");
@@ -115,27 +123,29 @@ public class TestProductController extends ControllerTester {
 			iPhone.setPrice(4399.0);
 			iPhone.setFactory(apple);
 			
-			ResultActions result = super.test(
+			result = super.test(
 					get("/product/add")
 						.param("amount", iPhone.getAmount().toString())
 						.param("factory", apple.getName())
 						.param("name", iPhone.getName())
 						.param("price", iPhone.getPrice().toString()),
-					true, jsonPath(RETURNED).isNumber());
+					status().isOk());
 
-			String content = result.andReturn().getResponse().getContentAsString();
+			final String content2 = result.andReturn().getResponse().getContentAsString();
+			assertDoesNotThrow(() -> { Integer.valueOf(content2); });
 			
-			Object data = objectMapper.readValue(new JSONObject(content).get(RETURNED).toString(), Integer.class);
+			Object data = objectMapper.readValue(content2.toString(), Integer.class);
 				
 			this.idsToDelete[0] = (Integer) data;
 			
 			result = super.test(
 					post("/product/add").contentType("application/json").content(this.objectMapper.writeValueAsString(iPhone)),
-					true, jsonPath(RETURNED).isNumber());
+					status().isOk());
 			
-			content = result.andReturn().getResponse().getContentAsString();
+			final String content3 = result.andReturn().getResponse().getContentAsString();
+			assertDoesNotThrow(() -> { Integer.valueOf(content3); });
 			
-			data = objectMapper.readValue(new JSONObject(content).get(RETURNED).toString(), Integer.class);
+			data = objectMapper.readValue(content3.toString(), Integer.class);
 				
 			this.idsToDelete[1] = (Integer) data;
 			
@@ -146,7 +156,12 @@ public class TestProductController extends ControllerTester {
 	
 	private void testListProducts() {
 		try {
-			super.test(get("/product/list"), true, jsonPath(RETURNED).isArray());
+			ResultActions result = super.test(get("/product/list"), status().isOk());
+			
+			String content = result.andReturn().getResponse().getContentAsString();
+			
+			assertNotEquals("", content);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -154,17 +169,14 @@ public class TestProductController extends ControllerTester {
 	
 	private void testRemoveProduct() {
 		try {
-			this.mockMvc.perform(get("/product/remove").param("id", this.idsToDelete[0].toString()))
-				.andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath(SUCCESS).value(true));
+			this.mockMvc.perform(delete("/product/"+this.idsToDelete[0].toString()+"/remove"))
+				.andDo(print()).andExpect(status().isOk());
 			
-			this.mockMvc.perform(get("/product/remove").param("id", this.idsToDelete[1].toString()))
-				.andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath(SUCCESS).value(true));
+			this.mockMvc.perform(delete("/product/"+this.idsToDelete[1].toString()+"/remove"))
+				.andDo(print()).andExpect(status().isOk());
 			
-			this.mockMvc.perform(get("/product/remove").param("id", "-1"))
-				.andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath(SUCCESS).value(false));
+			this.mockMvc.perform(delete("/product/-1/remove"))
+				.andDo(print()).andExpect(status().isNoContent());
 			
 		} catch (Exception e) {
 			e.printStackTrace();

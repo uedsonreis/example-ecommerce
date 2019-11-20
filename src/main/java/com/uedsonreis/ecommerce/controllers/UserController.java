@@ -3,6 +3,8 @@ package com.uedsonreis.ecommerce.controllers;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +17,6 @@ import com.uedsonreis.ecommerce.entities.Customer;
 import com.uedsonreis.ecommerce.entities.User;
 import com.uedsonreis.ecommerce.services.CustomerService;
 import com.uedsonreis.ecommerce.services.UserService;
-import com.uedsonreis.ecommerce.utils.ReturnType;
 import com.uedsonreis.ecommerce.utils.Util;
 
 @CrossOrigin(origins = "*")
@@ -30,24 +31,20 @@ public class UserController {
 	private CustomerService customerService;
 	
 	@RequestMapping("/logged")
-	public ReturnType logged(HttpSession httpSession) {
+	public ResponseEntity<String> logged(HttpSession httpSession) {
 
-		ReturnType result = new ReturnType();
-		
 		User logged = (User) httpSession.getAttribute(Util.LOGGED);
 		
 		if (logged == null) {
-			result.setSuccess(false);
-			result.setMessage(Util.getMsgNoUserLogged());
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
-			result.setData(logged.getLogin());
+			return new ResponseEntity<>(logged.getLogin(), HttpStatus.OK);
 		}
-		
-		return result;
+
 	}
 
 	@GetMapping("/customer/add")
-	public ReturnType addCustomer(HttpSession httpSession,
+	public ResponseEntity<Integer> addCustomer(HttpSession httpSession,
 			@RequestParam(value="email") String email,
 			@RequestParam(value="name") String name,
 			@RequestParam(value="age") Integer age,
@@ -61,25 +58,20 @@ public class UserController {
 	}
 	
 	@PostMapping("/customer/add")
-	public ReturnType addCustomer(HttpSession httpSession, @RequestBody Customer customer) {
+	public ResponseEntity<Integer> addCustomer(HttpSession httpSession, @RequestBody Customer customer) {
 		
-		ReturnType result = new ReturnType();
-
 		Integer id = this.customerService.save(customer);
 		
 		if (id == null) {
-			result.setSuccess(false);
-			result.setMessage(Util.getMsgEmailIsAlreadyRegistered());
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		} else {
-			result.setData(id);
 			httpSession.setAttribute(Util.LOGGED, customer.getUser());
+			return new ResponseEntity<>(id, HttpStatus.OK);
 		}
-		
-		return result;
 	}
 	
 	@GetMapping("/login")
-	public ReturnType login(HttpSession httpSession,
+	public ResponseEntity<String> login(HttpSession httpSession,
 			@RequestParam(value="login") String login,
 			@RequestParam(value="password") String password) { // Only for class example, don't do it in real life!
 		
@@ -89,21 +81,16 @@ public class UserController {
 	}
 	
 	@PostMapping("/login")
-	public ReturnType login(HttpSession httpSession, @RequestBody User user) {
+	public ResponseEntity<String> login(HttpSession httpSession, @RequestBody User user) {
 		
 		User logged = this.userService.login(user);
 
-		ReturnType result = new ReturnType();
-
 		if (logged == null) {
-			result.setSuccess(false);
-			result.setMessage(Util.getMsgLoginOrPasswordInvalid());
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		} else {
 			httpSession.setAttribute(Util.LOGGED, logged);
-			result.setData(logged.getLogin());
+			return new ResponseEntity<>(logged.getLogin(), HttpStatus.OK);
 		}
-		
-		return result;
 	}
 
 }

@@ -6,7 +6,11 @@ import java.util.Map;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,7 +18,6 @@ import com.uedsonreis.ecommerce.entities.Item;
 import com.uedsonreis.ecommerce.entities.SalesOrder;
 import com.uedsonreis.ecommerce.entities.User;
 import com.uedsonreis.ecommerce.services.SalesOrderService;
-import com.uedsonreis.ecommerce.utils.ReturnType;
 import com.uedsonreis.ecommerce.utils.Util;
 
 @CrossOrigin(origins = "*")
@@ -25,54 +28,43 @@ public class SalesOrderController {
 	@Autowired
 	private SalesOrderService salesOrderService;
 	
-	@RequestMapping("/invoice")
-	public ReturnType invoice(HttpSession httpSession) {
+	@PostMapping("/invoice")
+	public ResponseEntity<Object> invoice(HttpSession httpSession) {
 		
 		@SuppressWarnings("unchecked")
 		Map<Integer, Item> cart = (Map<Integer, Item>) httpSession.getAttribute(Util.CART);
 		
 		User logged = (User) httpSession.getAttribute(Util.LOGGED);
 		
-		ReturnType result = new ReturnType();
-		
 		if (cart == null) {
-			result.setSuccess(false);
-			result.setMessage(Util.getMsgNothingInCart());
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			
 		} else if (logged == null) {
-			result.setSuccess(false);
-			result.setMessage(Util.getMsgYouNeedLogIn());
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 			
 		} else {
 			try {
 				SalesOrder salesOrder = this.salesOrderService.invoice(cart, logged);
-				result.setData( salesOrder );
+				return new ResponseEntity<>(salesOrder, HttpStatus.OK);
 				
 			} catch (Exception e) {
-				result.setSuccess(false);
-				result.setMessage(e.getMessage());
+				return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 			}
 		}
-		return result;
 	}
 	
-	@RequestMapping("/list")
-	public ReturnType login(HttpSession httpSession) {
+	@GetMapping("/list")
+	public ResponseEntity<Object> login(HttpSession httpSession) {
 		
 		User logged = (User) httpSession.getAttribute(Util.LOGGED);
 		
 		Collection<SalesOrder> salesOrders = this.salesOrderService.getSalesOrders(logged);
 		
-		ReturnType result = new ReturnType();
-		
 		if (salesOrders.size() < 1) {
-			result.setSuccess(false);
-			result.setMessage(Util.getMsgNoSalesOrder());
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
-			result.setData(salesOrders);
+			return new ResponseEntity<>(salesOrders, HttpStatus.OK);
 		}
-		
-		return result;
 	}
 
 }

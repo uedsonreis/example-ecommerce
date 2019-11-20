@@ -1,11 +1,12 @@
 package com.uedsonreis.ecommerce.controllers;
 
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -112,28 +113,28 @@ public class TestSalesControllers extends ControllerTester {
 					.param("email", customer.getEmail())
 					.param("name", customer.getName())
 					.param("password", user.getPassword()),
-				true, jsonPath(RETURNED).isNumber());
+				status().isOk());
 		
 		String content = result.andReturn().getResponse().getContentAsString();
-		Object data = objectMapper.readValue(new JSONObject(content).get(RETURNED).toString(), Integer.class);
-		this.idsToDelete[2] = (Integer) data;
+		this.idsToDelete[2] = Integer.valueOf(content);
 		
-		result = super.test(post("/sales/order/invoice"), true, jsonPath(RETURNED).exists());
+		result = super.test(post("/sales/order/invoice"), status().isOk());
+		content = result.andReturn().getResponse().getContentAsString();
+		
+		assertNotEquals("", content);
 		
 		content = result.andReturn().getResponse().getContentAsString();
-		data = objectMapper.readValue(new JSONObject(content).get(RETURNED).toString(), SalesOrder.class);
+		Object data = objectMapper.readValue(new JSONObject(content).toString(), SalesOrder.class);
 		this.idsToDelete[3] = ((SalesOrder) data).getId();
 	}
 	
 	private void testAddInCart() throws Exception {
 		ResultActions result = this.mockMvc.perform(get("/product/list"))
-			.andDo(print()).andExpect(status().isOk())
-			.andExpect(jsonPath(SUCCESS).value(true))
-			.andExpect(jsonPath(RETURNED).isArray());
+			.andDo(print()).andExpect(status().isOk());
 		
 		String content = result.andReturn().getResponse().getContentAsString();
 		
-		Object data = objectMapper.readValue(new JSONObject(content).get(RETURNED).toString(), Product[].class);
+		Object data = objectMapper.readValue(new JSONArray(content).toString(), Product[].class);
 			
 		Product[] products = (Product[]) data;
 		
@@ -144,7 +145,7 @@ public class TestSalesControllers extends ControllerTester {
 					.param("productId", product1.getId().toString())
 					.param("amount", "1")
 					.param("price", product1.getPrice().toString()),
-				true, jsonPath(RETURNED).doesNotExist());
+				status().isOk());
 		
 		Product product2 = products[1];
 		
@@ -155,15 +156,15 @@ public class TestSalesControllers extends ControllerTester {
 
 		super.test(
 				post("/cart/add").contentType("application/json").content(this.objectMapper.writeValueAsString(item)),
-				true, jsonPath(RETURNED).doesNotExist());			
+				status().isOk());			
 	}
 	
 	@Test
 	public void testCart() {
 		try {
-			super.test(get("/cart/list"), false, jsonPath(RETURNED).doesNotExist());
+			super.test(get("/cart/list"), status().isNoContent());
 			this.testAddInCart();
-			super.test(get("/cart/list"), true, jsonPath(RETURNED).isArray());
+			super.test(get("/cart/list"), status().isOk());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -172,9 +173,9 @@ public class TestSalesControllers extends ControllerTester {
 	@Test
 	public void testSalesOrder() {
 		try {
-			super.test(get("/sales/order/list"), false, jsonPath(RETURNED).doesNotExist());
+			super.test(get("/sales/order/list"), status().isNoContent());
 			this.testInvoice();
-			super.test(get("/sales/order/list"), true, jsonPath(RETURNED).isArray());
+			super.test(get("/sales/order/list"), status().isOk());
 
 		} catch (Exception e) {
 			e.printStackTrace();

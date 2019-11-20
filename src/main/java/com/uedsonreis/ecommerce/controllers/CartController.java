@@ -5,6 +5,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.uedsonreis.ecommerce.entities.Item;
 import com.uedsonreis.ecommerce.entities.Product;
-import com.uedsonreis.ecommerce.utils.ReturnType;
 import com.uedsonreis.ecommerce.utils.Util;
 
 @CrossOrigin(origins = "*")
@@ -24,7 +25,7 @@ import com.uedsonreis.ecommerce.utils.Util;
 public class CartController {
 
 	@GetMapping("/add")
-	public ReturnType add(HttpSession httpSession,
+	public void add(HttpSession httpSession,
 			@RequestParam(value="productId") Integer productId,
 			@RequestParam(value="price") Double price,
 			@RequestParam(value="amount") Integer amount) {
@@ -32,14 +33,12 @@ public class CartController {
 		Product product = Product.builder().id(productId).build();
 		Item item = Item.builder().price(price).amount(amount).product(product).build();
 		
-		return this.add(httpSession, item);
+		this.add(httpSession, item);
 	}
 	
 	@PostMapping("/add")
-	public ReturnType add(HttpSession httpSession, @RequestBody Item item) {
+	public void add(HttpSession httpSession, @RequestBody Item item) {
 
-		ReturnType result = new ReturnType();
-			
 		Map<Integer, Item> cart = this.getShoppingCart(httpSession);
 		
 		Item itemInCart = cart.get(item.getProduct().getId());
@@ -51,24 +50,17 @@ public class CartController {
 		}
 		
 		httpSession.setAttribute(Util.CART, cart);
-		
-		return result;
 	}
 	
 	@RequestMapping("/list")
-	public ReturnType list(HttpSession httpSession) {
-		ReturnType result = new ReturnType();
-		
+	public ResponseEntity<Object> list(HttpSession httpSession) {
 		Map<Integer, Item> cart = this.getShoppingCart(httpSession);
 		
 		if (cart.isEmpty()) {
-			result.setSuccess(false);
-			result.setMessage(Util.getMsgNothingInCart());
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
-			result.setData(cart.values());
+			return new ResponseEntity<>(cart.values(), HttpStatus.OK);
 		}
-		
-		return result;
 	}
 	
 	private Map<Integer, Item> getShoppingCart(HttpSession httpSession) {

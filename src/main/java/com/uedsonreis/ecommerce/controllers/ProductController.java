@@ -5,8 +5,13 @@ import java.util.Collection;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,7 +21,6 @@ import com.uedsonreis.ecommerce.entities.Factory;
 import com.uedsonreis.ecommerce.entities.Product;
 import com.uedsonreis.ecommerce.entities.User;
 import com.uedsonreis.ecommerce.services.ProductService;
-import com.uedsonreis.ecommerce.utils.ReturnType;
 import com.uedsonreis.ecommerce.utils.Util;
 
 @CrossOrigin(origins = "*")
@@ -28,7 +32,7 @@ public class ProductController {
 	ProductService productService;
 	
 	@GetMapping("/add")
-	public ReturnType add(HttpSession httpSession,
+	public ResponseEntity<Integer> add(HttpSession httpSession,
 			@RequestParam(value="name") String name,
 			@RequestParam(value="factory") String factoryName,
 			@RequestParam(value="price") Double price,
@@ -40,59 +44,49 @@ public class ProductController {
 		return this.add(httpSession, product);
 	}
 	
-	@RequestMapping("/add")
-	public ReturnType add(HttpSession httpSession, @RequestBody Product product) {
-		
-		ReturnType result = new ReturnType();
+	@PostMapping("/add")
+	public ResponseEntity<Integer> add(HttpSession httpSession, @RequestBody Product product) {
 		
 		User logged = (User) httpSession.getAttribute(Util.LOGGED);
 		
-		if (logged != null && logged.getAdmin()) {
-			Integer productId = this.productService.save(product);
-			result.setData(productId);
-		} else {
-			result.setSuccess(false);
-			result.setMessage(Util.getMsgYouMustLogInAsAdm());
+		if (logged == null || (!logged.getAdmin())) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		}
 		
-		return result;
+		Integer productId = this.productService.save(product);
+		if (productId == null) {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);			
+		} else {
+			return new ResponseEntity<>(productId, HttpStatus.OK);
+		}
 	}
 	
-	@RequestMapping("/remove")
-	public ReturnType remove(HttpSession httpSession, @RequestParam(value="id") Integer id) {
-		
-		ReturnType result = new ReturnType();
+	@DeleteMapping("/{id}/remove")
+	public ResponseEntity<Object> remove(HttpSession httpSession, @PathVariable(value="id") Integer id) {
 		
 		User logged = (User) httpSession.getAttribute(Util.LOGGED);
 		
-		if (logged != null && logged.getAdmin()) {
-			if (!this.productService.remove(id)) {
-				result.setSuccess(false);
-				result.setMessage(Util.getMsgIdIsNotRegistered());
-			}
-		} else {
-			result.setSuccess(false);
-			result.setMessage(Util.getMsgYouMustLogInAsAdm());
+		if (logged == null || (!logged.getAdmin())) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		}
-		
-		return result;
+
+		if (this.productService.remove(id)) {
+			return new ResponseEntity<>(HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
 	}
 	
-	@RequestMapping("/list")
-	public ReturnType list() {
-		
-		ReturnType result = new ReturnType();
+	@GetMapping("/list")
+	public ResponseEntity<Object> list() {
 		
 		Collection<Product> products = this.productService.getProducts();
 		
 		if (products == null || products.size() < 1) {
-			result.setSuccess(false);
-			result.setMessage(Util.getMsgNoProductRegistered());
+			return new ResponseEntity<>(Util.getMsgNoProductRegistered(), HttpStatus.NO_CONTENT);
 		} else {
-			result.setData(products);
+			return new ResponseEntity<>(products, HttpStatus.OK);
 		}
-		
-		return result;
 	}
 
 }
