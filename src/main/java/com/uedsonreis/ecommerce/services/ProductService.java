@@ -44,7 +44,7 @@ public class ProductService {
 	
 	public Boolean remove(int id) {
 		Optional<Product> product = this.repository.findById(id);
-		if (product.isEmpty()) return false;
+		if (!product.isPresent()) return false;
 		
 		this.repository.deleteById(id);
 		return true;
