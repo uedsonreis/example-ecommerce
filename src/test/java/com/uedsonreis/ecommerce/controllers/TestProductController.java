@@ -59,7 +59,11 @@ public class TestProductController extends ControllerTester {
 		nootebook.setPrice(6399.0);
 		nootebook.setFactory(microsoft);
 		
-		this.productService.save(nootebook);
+		try {
+			this.productService.save(nootebook);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Test

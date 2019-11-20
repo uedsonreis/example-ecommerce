@@ -44,7 +44,7 @@ public class UserController {
 	}
 
 	@GetMapping("/customer/add")
-	public ResponseEntity<Integer> addCustomer(HttpSession httpSession,
+	public ResponseEntity<Object> addCustomer(HttpSession httpSession,
 			@RequestParam(value="email") String email,
 			@RequestParam(value="name") String name,
 			@RequestParam(value="age") Integer age,
@@ -58,9 +58,14 @@ public class UserController {
 	}
 	
 	@PostMapping("/customer/add")
-	public ResponseEntity<Integer> addCustomer(HttpSession httpSession, @RequestBody Customer customer) {
+	public ResponseEntity<Object> addCustomer(HttpSession httpSession, @RequestBody Customer customer) {
 		
-		Integer id = this.customerService.save(customer);
+		Integer id = null;
+		try {
+			id = this.customerService.save(customer);
+		} catch (Exception e) {
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
 		
 		if (id == null) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

@@ -32,7 +32,7 @@ public class ProductController {
 	ProductService productService;
 	
 	@GetMapping("/add")
-	public ResponseEntity<Integer> add(HttpSession httpSession,
+	public ResponseEntity<Object> add(HttpSession httpSession,
 			@RequestParam(value="name") String name,
 			@RequestParam(value="factory") String factoryName,
 			@RequestParam(value="price") Double price,
@@ -45,7 +45,7 @@ public class ProductController {
 	}
 	
 	@PostMapping("/add")
-	public ResponseEntity<Integer> add(HttpSession httpSession, @RequestBody Product product) {
+	public ResponseEntity<Object> add(HttpSession httpSession, @RequestBody Product product) {
 		
 		User logged = (User) httpSession.getAttribute(Util.LOGGED);
 		
@@ -53,9 +53,16 @@ public class ProductController {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		}
 		
-		Integer productId = this.productService.save(product);
+		Integer productId = null;
+		
+		try {
+			productId = this.productService.save(product);
+		} catch (Exception e) {
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+
 		if (productId == null) {
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);			
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		} else {
 			return new ResponseEntity<>(productId, HttpStatus.OK);
 		}

@@ -70,7 +70,11 @@ public class TestSalesOrderService {
 		this.product.setPrice(6399.0);
 		this.product.setFactory(microsoft);
 		
-		this.productService.save(this.product);
+		try {
+			this.productService.save(this.product);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@BeforeAll
@@ -85,7 +89,11 @@ public class TestSalesOrderService {
 		customer.setEmail(this.user.getLogin());
 		customer.setAddress("Rua Profº. Cicrano, n. 59, ap. 88");
 		
-		this.customerService.save(customer);
+		try {
+			this.customerService.save(customer);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@AfterAll

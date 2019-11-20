@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.uedsonreis.ecommerce.entities.Customer;
 import com.uedsonreis.ecommerce.entities.User;
 import com.uedsonreis.ecommerce.repositories.CustomerRepository;
+import com.uedsonreis.ecommerce.utils.Util;
 
 @Service
 public class CustomerService {
@@ -13,18 +14,18 @@ public class CustomerService {
 	@Autowired
 	private CustomerRepository repository;
 	
-	public Integer save(Customer customer) {
+	public Integer save(Customer customer) throws Exception {
 		if (customer.getEmail() == null) return null;
 		if (customer.getName() == null) return null;
 		if (customer.getAge() == null) return null;
 		if (customer.getUser() == null) return null;
 		
-		if (customer.getAge() < 18) return null;
+		if (customer.getAge() < 18) throw new Exception(Util.getMsgCustomerMustBeAdult());
 		if (customer.getUser().getPassword() == null) return null;
 		
 		Customer customerDB = this.repository.findByEmail(customer.getEmail());
 		
-		if (customerDB != null) return null;
+		if (customerDB != null) throw new Exception(Util.getMsgCustomerAlreadyExists());
 		
 		customer.getUser().setLogin(customer.getEmail());
 		customer.getUser().setAdmin(false);

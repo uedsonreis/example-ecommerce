@@ -142,16 +142,10 @@ public class TestUserController extends ControllerTester {
 					status().isBadRequest());
 			
 			result.andExpect(jsonPath("password").doesNotExist());
-			
-			String content = result.andReturn().getResponse().getContentAsString();
-			assertEquals("", content);
 
 			result = super.test(
 					post("/user/customer/add").contentType("application/json").content(this.objectMapper.writeValueAsString(customer)),
 					status().isBadRequest());
-			
-			content = result.andReturn().getResponse().getContentAsString();
-			assertEquals("", content);
 
 			// Test to a correct age.
 			customer.setAge(37);
@@ -177,9 +171,6 @@ public class TestUserController extends ControllerTester {
 			result = super.test(
 					post("/user/customer/add").contentType("application/json").content(this.objectMapper.writeValueAsString(customer)),
 					status().isBadRequest());
-			
-			content = result.andReturn().getResponse().getContentAsString();
-			assertEquals("", content);
 			
 		} catch (Exception e) {
 			e.printStackTrace();

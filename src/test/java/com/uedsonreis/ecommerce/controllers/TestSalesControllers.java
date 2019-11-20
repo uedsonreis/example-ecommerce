@@ -80,8 +80,12 @@ public class TestSalesControllers extends ControllerTester {
 		iPhone.setPrice(4399.0);
 		iPhone.setFactory(apple);
 		
-		this.idsToDelete[0] = this.productService.save(macBook);
-		this.idsToDelete[1] = this.productService.save(iPhone);
+		try {
+			this.idsToDelete[0] = this.productService.save(macBook);
+			this.idsToDelete[1] = this.productService.save(iPhone);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@AfterAll

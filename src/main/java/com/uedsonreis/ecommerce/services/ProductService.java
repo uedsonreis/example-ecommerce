@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.uedsonreis.ecommerce.entities.Product;
 import com.uedsonreis.ecommerce.repositories.ProductRepository;
+import com.uedsonreis.ecommerce.utils.Util;
 
 @Service
 public class ProductService {
@@ -21,12 +22,12 @@ public class ProductService {
 	private FactoryService factoryService;
 	
 	@Transactional
-	public Integer save(Product product) {
+	public Integer save(Product product) throws Exception {
 		
-		if (product.getName() == null) return null;
-		if (product.getPrice() == null) return null;
-		if (product.getAmount() == null) return null;
-		if (product.getFactory() == null) return null;
+		if (product.getName() == null) throw new Exception(Util.getMsgProductNameIsRequired());
+		if (product.getPrice() == null) throw new Exception(Util.getMsgProductPriceIsRequired());
+		if (product.getAmount() == null) throw new Exception(Util.getMsgProductAmountIsRequired());
+		if (product.getFactory() == null) throw new Exception(Util.getMsgFactoryIsRequired());
 		
 		product.setFactory( this.factoryService.save( product.getFactory() ) );
 		

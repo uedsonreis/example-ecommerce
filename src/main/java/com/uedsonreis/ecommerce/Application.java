@@ -65,9 +65,6 @@ public class Application {
 				iPhoneX.setPrice(4999.0);
 				iPhoneX.setFactory(apple);
 				
-				productService.save(iPhone8);
-				productService.save(iPhoneX);
-				
 				Product galaxyS9 = new Product();
 				galaxyS9.setName("Galaxy S9");
 				galaxyS9.setAmount(7);
@@ -79,9 +76,15 @@ public class Application {
 				galaxyS10.setAmount(8);
 				galaxyS10.setPrice(3999.0);
 				galaxyS10.setFactory(samsung);
-				
-				productService.save(galaxyS9);
-				productService.save(galaxyS10);
+
+				try {
+					productService.save(iPhone8);
+					productService.save(iPhoneX);
+					productService.save(galaxyS9);
+					productService.save(galaxyS10);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	} 

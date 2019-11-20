@@ -44,13 +44,13 @@ public class SalesOrderService {
 		for (Integer productId: cart.keySet()) {
 			Product product = this.productService.get(productId);
 			if (product == null) {
-				throw new Exception("Product Id "+ productId +" doesn't exists.");
+				throw new Exception(Util.getMsgProductIdDoesntExist());
 			}
 			
 			Item item = cart.get(productId);
 			
 			if (product.getAmount() < item.getAmount()) {
-				throw new Exception("Product "+ product.getName() +" doesn't have enough amount.");
+				throw new Exception(Util.getMsgProductDoesntHaveAmount(product.getName()));
 			}
 			
 			item.setProduct(product);
