@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,12 +29,17 @@ public class SalesOrderController {
 	@Autowired
 	private SalesOrderService salesOrderService;
 	
-	@PostMapping("/invoice")
+	@GetMapping("/invoice")
 	public ResponseEntity<Object> invoice(HttpSession httpSession) {
 		
 		@SuppressWarnings("unchecked")
 		Map<Integer, Item> cart = (Map<Integer, Item>) httpSession.getAttribute(Util.CART);
 		
+		return this.invoice(httpSession, cart.values());
+	}
+	
+	@PostMapping("/invoice")
+	public ResponseEntity<Object> invoice(HttpSession httpSession, @RequestBody Collection<Item> cart) {
 		User logged = (User) httpSession.getAttribute(Util.LOGGED);
 		
 		if (cart == null) {

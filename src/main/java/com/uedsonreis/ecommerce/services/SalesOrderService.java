@@ -2,7 +2,6 @@ package com.uedsonreis.ecommerce.services;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -35,25 +34,11 @@ public class SalesOrderService {
 	private SalesOrderRepository salesOrderRepository;
 	
 	@Transactional
-	public SalesOrder invoice(Map<Integer, Item> cart, User user) throws Exception {
+	public SalesOrder invoice(Collection<Item> cart, User user) throws Exception {
+		
 		Customer customer = this.customerService.get(user);
 		if (customer == null) {
 			throw new Exception(Util.getMsgCustomerDoesntExists());
-		}
-		
-		for (Integer productId: cart.keySet()) {
-			Product product = this.productService.get(productId);
-			if (product == null) {
-				throw new Exception(Util.getMsgProductIdDoesntExist());
-			}
-			
-			Item item = cart.get(productId);
-			
-			if (product.getAmount() < item.getAmount()) {
-				throw new Exception(Util.getMsgProductDoesntHaveAmount(product.getName()));
-			}
-			
-			item.setProduct(product);
 		}
 		
 		Double totalValue = 0.0;
@@ -61,14 +46,22 @@ public class SalesOrderService {
 		SalesOrder salesOrder = SalesOrder.builder().customer(customer).build();		
 		this.salesOrderRepository.save(salesOrder);
 		
-		for (Item item: cart.values()) {
-			Product product = item.getProduct();
-			product.setAmount( product.getAmount() - item.getAmount() );
+		for (Item item: cart) {
+			Product product = this.productService.get(item.getProduct().getId());
+			if (product == null) {
+				throw new Exception(Util.getMsgProductIdDoesntExist());
+			}
 			
+			if (product.getAmount() < item.getAmount()) {
+				throw new Exception(Util.getMsgProductDoesntHaveAmount(product.getName()));
+			}
+						
+			product.setAmount( product.getAmount() - item.getAmount() );
 			totalValue += item.getPrice() * item.getAmount();
 			
 			salesOrder.setTotalValue(totalValue);
 			
+			item.setProduct(product);
 			item.setSalesOrder(salesOrder);
 			this.itemRepository.save(item);
 		}

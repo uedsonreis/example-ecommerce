@@ -3,8 +3,8 @@ package com.uedsonreis.ecommerce.services;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -112,14 +112,13 @@ public class TestSalesOrderService {
 	}
 	
 	private void testInvoice() {
-		Map<Integer, Item> cart = new HashMap<>();
+		Set<Item> cart = new HashSet<>();
 		
 		Item item = new Item();
 		item.setProduct(this.product);
 		item.setPrice(product.getPrice());
 		item.setAmount(10);
-		
-		cart.put(this.product.getId(), item);
+		cart.add(item);
 		
 		SalesOrder salesOrder = null;
 		try {

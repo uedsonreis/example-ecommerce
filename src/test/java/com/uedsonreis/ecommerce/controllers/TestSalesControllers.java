@@ -122,7 +122,7 @@ public class TestSalesControllers extends ControllerTester {
 		String content = result.andReturn().getResponse().getContentAsString();
 		this.idsToDelete[2] = Integer.valueOf(content);
 		
-		result = super.test(post("/sales/order/invoice"), status().isOk());
+		result = super.test(get("/sales/order/invoice"), status().isOk());
 		content = result.andReturn().getResponse().getContentAsString();
 		
 		assertNotEquals("", content);
