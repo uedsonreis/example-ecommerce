@@ -35,6 +35,10 @@ public class SalesOrderController {
 		@SuppressWarnings("unchecked")
 		Map<Integer, Item> cart = (Map<Integer, Item>) httpSession.getAttribute(Util.CART);
 		
+		if (cart == null) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		
 		return this.invoice(httpSession, cart.values());
 	}
 	

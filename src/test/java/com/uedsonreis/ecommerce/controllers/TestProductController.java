@@ -112,14 +112,14 @@ public class TestProductController extends ControllerTester {
 			admin.setPassword("admin");
 			
 			ResultActions result = super.test(
-					get("/user/login").param("login", admin.getLogin()).param("password", admin.getPassword()),
+					post("/user/login").contentType("application/json").content(this.objectMapper.writeValueAsString(admin)),
 					status().isOk());
 			
 			String content = result.andReturn().getResponse().getContentAsString();
 			assertEquals(admin.getLogin(), content);
 			
 			Factory apple = new Factory();
-			apple.setName("Apple Inc.");
+			apple.setName("Apple");
 			
 			Product iPhone = new Product();
 			iPhone.setAmount(10);

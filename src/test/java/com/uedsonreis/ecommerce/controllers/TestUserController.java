@@ -68,32 +68,18 @@ public class TestUserController extends ControllerTester {
 			final User wrong = new User();
 			wrong.setLogin("qualquer");
 			wrong.setPassword("123");
-			
-			ResultActions result = super.test(
-					get("/user/login").param("login", wrong.getLogin()).param("password", wrong.getPassword()),
-					status().isBadRequest());
-			
-			String content = result.andReturn().getResponse().getContentAsString();
-			assertEquals("", content);
 
-			result = super.test(
+			ResultActions result = super.test(
 					post("/user/login").contentType("application/json").content(this.objectMapper.writeValueAsString(wrong)),
 					status().isBadRequest());
 			
-			content = result.andReturn().getResponse().getContentAsString();
+			String content = result.andReturn().getResponse().getContentAsString();
 			assertEquals("", content);
 
 			// Test to a registered user.
 			final User right = new User();
 			right.setLogin("admin");
 			right.setPassword("admin");
-
-			result = super.test(
-					get("/user/login").param("login", right.getLogin()).param("password", right.getPassword()),
-					status().isOk());
-			
-			content = result.andReturn().getResponse().getContentAsString();
-			assertEquals("admin", content);
 			
 			result = super.test(
 					post("/user/login").contentType("application/json").content(this.objectMapper.writeValueAsString(right)),

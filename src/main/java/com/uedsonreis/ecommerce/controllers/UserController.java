@@ -75,16 +75,6 @@ public class UserController {
 		}
 	}
 	
-	@GetMapping("/login")
-	public ResponseEntity<String> login(HttpSession httpSession,
-			@RequestParam(value="login") String login,
-			@RequestParam(value="password") String password) { // Only for class example, don't do it in real life!
-		
-		User user = User.builder().login(login).password(password).build();
-		
-		return this.login(httpSession, user);
-	}
-	
 	@PostMapping("/login")
 	public ResponseEntity<String> login(HttpSession httpSession, @RequestBody User user) {
 		
