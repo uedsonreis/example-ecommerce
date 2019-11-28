@@ -1,11 +1,10 @@
 package com.uedsonreis.ecommerce.controllers;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -25,6 +24,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uedsonreis.ecommerce.entities.Customer;
 import com.uedsonreis.ecommerce.entities.User;
 import com.uedsonreis.ecommerce.repositories.CustomerRepository;
+import com.uedsonreis.ecommerce.repositories.UserRepository;
+import com.uedsonreis.ecommerce.utils.Util;
 
 @ActiveProfiles("test")
 @TestInstance(Lifecycle.PER_CLASS)
@@ -33,14 +34,17 @@ import com.uedsonreis.ecommerce.repositories.CustomerRepository;
 @AutoConfigureMockMvc
 public class TestUserController extends ControllerTester {
 	
+	private String token;
+	
+	@Autowired
+	private UserRepository userRepository;
+	
 	@Autowired
 	private CustomerRepository customerRepository;
 	
 	@Autowired
 	private ObjectMapper objectMapper;
 	
-	private Integer idToDelete = null;
-
 	@BeforeAll
 	public void setup(WebApplicationContext wac) {
 		super.setup(wac);
@@ -48,17 +52,18 @@ public class TestUserController extends ControllerTester {
 
 	@AfterAll
 	public void deleteCustomers() {
-		this.customerRepository.deleteById(this.idToDelete);
+		for (Customer c: this.customerRepository.findAll()) {
+			this.customerRepository.delete(c);
+			this.userRepository.delete(c.getUser());
+		}
 	}
 	
 	@Test
 	public void testLogin() {
 		// Test verify a logged user
 		try {
-			ResultActions result = super.test(get("/user/logged"), status().isNoContent());
+			super.test(get("/user/logged").header(Util.AUTH, "token"), status().isNoContent());
 			
-			String content = result.andReturn().getResponse().getContentAsString();
-			assertEquals("", content);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -69,24 +74,22 @@ public class TestUserController extends ControllerTester {
 			wrong.setLogin("qualquer");
 			wrong.setPassword("123");
 
-			ResultActions result = super.test(
-					post("/user/login").contentType("application/json").content(this.objectMapper.writeValueAsString(wrong)),
+			super.test(
+					post("/user/login").contentType("application/json")
+					.content(this.objectMapper.writeValueAsString(wrong)),
 					status().isBadRequest());
-			
-			String content = result.andReturn().getResponse().getContentAsString();
-			assertEquals("", content);
 
 			// Test to a registered user.
 			final User right = new User();
 			right.setLogin("admin");
 			right.setPassword("admin");
 			
-			result = super.test(
+			ResultActions result = super.test(
 					post("/user/login").contentType("application/json").content(this.objectMapper.writeValueAsString(right)),
 					status().isOk());
 			
-			content = result.andReturn().getResponse().getContentAsString();
-			assertEquals("admin", content);
+			this.token = result.andReturn().getResponse().getContentAsString();
+			assertNotEquals("", this.token);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -94,7 +97,7 @@ public class TestUserController extends ControllerTester {
 		
 		// Test verify a logged user again
 		try {
-			ResultActions result = super.test(get("/user/logged"), status().isOk());
+			ResultActions result = super.test(get("/user/logged").header(Util.AUTH, this.token), status().isOk());
 			String content = result.andReturn().getResponse().getContentAsString();
 			assertEquals("admin", content);
 		} catch (Exception e) {
@@ -126,8 +129,6 @@ public class TestUserController extends ControllerTester {
 						.param("name", customer.getName())
 						.param("password", user.getPassword()),
 					status().isBadRequest());
-			
-			result.andExpect(jsonPath("password").doesNotExist());
 
 			result = super.test(
 					post("/user/customer/add").contentType("application/json").content(this.objectMapper.writeValueAsString(customer)),
@@ -145,13 +146,8 @@ public class TestUserController extends ControllerTester {
 						.param("password", user.getPassword()),
 					status().isOk());
 						
-			final String content2 = result.andReturn().getResponse().getContentAsString();
-			
-			assertDoesNotThrow(() -> { Integer.valueOf(content2); });
-			
-			Object data = objectMapper.readValue(content2, Integer.class);
-				
-			this.idToDelete = (Integer) data;
+			this.token = result.andReturn().getResponse().getContentAsString();
+			assertNotEquals("", this.token);
 
 			// Test to add the same customer.
 			result = super.test(

@@ -6,8 +6,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Collection;
+
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -27,12 +28,13 @@ import com.uedsonreis.ecommerce.entities.Customer;
 import com.uedsonreis.ecommerce.entities.Factory;
 import com.uedsonreis.ecommerce.entities.Item;
 import com.uedsonreis.ecommerce.entities.Product;
-import com.uedsonreis.ecommerce.entities.SalesOrder;
 import com.uedsonreis.ecommerce.entities.User;
 import com.uedsonreis.ecommerce.repositories.CustomerRepository;
 import com.uedsonreis.ecommerce.repositories.ItemRepository;
+import com.uedsonreis.ecommerce.repositories.UserRepository;
 import com.uedsonreis.ecommerce.services.ProductService;
 import com.uedsonreis.ecommerce.services.SalesOrderService;
+import com.uedsonreis.ecommerce.utils.Util;
 
 @ActiveProfiles("test")
 @TestInstance(Lifecycle.PER_CLASS)
@@ -43,6 +45,9 @@ public class TestSalesControllers extends ControllerTester {
 
 	@Autowired
 	private ObjectMapper objectMapper;
+	
+	@Autowired
+	private UserRepository userRepository;
 	
 	@Autowired
 	private ItemRepository itemRepository;
@@ -66,7 +71,7 @@ public class TestSalesControllers extends ControllerTester {
 	@BeforeAll
 	public void addSomeProducts() {
 		Factory apple = new Factory();
-		apple.setName("Apple Inc.");
+		apple.setName("Apple");
 		
 		Product macBook = new Product();
 		macBook.setAmount(5);
@@ -91,45 +96,14 @@ public class TestSalesControllers extends ControllerTester {
 	@AfterAll
 	public void removeSameProducts() {
 		this.itemRepository.deleteAll();
-		this.salesOrderService.remove(this.idsToDelete[3]);
-		this.customerRepository.deleteById(this.idsToDelete[2]);
+		this.salesOrderService.remove(this.idsToDelete[2]);
 		this.productService.remove(this.idsToDelete[0]);
 		this.productService.remove(this.idsToDelete[1]);
-	}
-	
-	private void testInvoice() throws Exception {
 		
-		User user = new User();
-		user.setLogin("uedson@reis.com");
-		user.setPassword("321");
-		
-		Customer customer = new Customer();
-		customer.setAge(37);
-		customer.setUser(user);
-		customer.setName("Uedson Reis");
-		customer.setEmail(user.getLogin());
-		customer.setAddress("Rua Fulano de Tal, n. 13");
-		
-		ResultActions result = super.test(
-				get("/user/customer/add")
-					.param("address", customer.getAddress())
-					.param("age", customer.getAge().toString())
-					.param("email", customer.getEmail())
-					.param("name", customer.getName())
-					.param("password", user.getPassword()),
-				status().isOk());
-		
-		String content = result.andReturn().getResponse().getContentAsString();
-		this.idsToDelete[2] = Integer.valueOf(content);
-		
-		result = super.test(get("/sales/order/invoice"), status().isOk());
-		content = result.andReturn().getResponse().getContentAsString();
-		
-		assertNotEquals("", content);
-		
-		content = result.andReturn().getResponse().getContentAsString();
-		Object data = objectMapper.readValue(new JSONObject(content).toString(), SalesOrder.class);
-		this.idsToDelete[3] = ((SalesOrder) data).getId();
+		for (Customer c: this.customerRepository.findAll()) {
+			this.customerRepository.delete(c);
+			this.userRepository.delete(c.getUser());
+		}
 	}
 	
 	private void testAddInCart() throws Exception {
@@ -168,7 +142,7 @@ public class TestSalesControllers extends ControllerTester {
 		try {
 			super.test(get("/cart/list"), status().isNoContent());
 			this.testAddInCart();
-			super.test(get("/cart/list"), status().isOk());
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -177,9 +151,48 @@ public class TestSalesControllers extends ControllerTester {
 	@Test
 	public void testSalesOrder() {
 		try {
-			super.test(get("/sales/order/list"), status().isNoContent());
-			this.testInvoice();
-			super.test(get("/sales/order/list"), status().isOk());
+			super.test(get("/sales/order/list"), status().isUnauthorized());
+			
+			User user = new User();
+			user.setLogin("uedson@reis.com");
+			user.setPassword("321");
+			
+			Customer customer = new Customer();
+			customer.setAge(37);
+			customer.setUser(user);
+			customer.setName("Uedson Reis");
+			customer.setEmail(user.getLogin());
+			customer.setAddress("Rua Fulano de Tal, n. 13");
+			
+			ResultActions result = super.test(
+					get("/user/customer/add")
+						.param("address", customer.getAddress())
+						.param("age", customer.getAge().toString())
+						.param("email", customer.getEmail())
+						.param("name", customer.getName())
+						.param("password", user.getPassword()),
+					status().isOk());
+			
+			String token = result.andReturn().getResponse().getContentAsString();
+			assertNotEquals("", token);
+			
+			result = super.test(get("/cart/list"), status().isOk());
+			String content = result.andReturn().getResponse().getContentAsString();
+			Object data = objectMapper.readValue(new JSONArray(content).toString(), Collection.class);
+			
+			result = super.test(
+					post("/sales/order/invoice")
+						.contentType("application/json").content(this.objectMapper.writeValueAsString(data))
+						.header(Util.AUTH, token),
+					status().isOk());
+
+			content = result.andReturn().getResponse().getContentAsString();
+			assertNotEquals("", content);
+			
+			content = result.andReturn().getResponse().getContentAsString();
+			this.idsToDelete[2] = Integer.valueOf(content);
+			
+			super.test(get("/sales/order/list").header(Util.AUTH, token), status().isOk());
 
 		} catch (Exception e) {
 			e.printStackTrace();

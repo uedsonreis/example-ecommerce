@@ -1,7 +1,6 @@
 package com.uedsonreis.ecommerce.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -27,6 +26,7 @@ import com.uedsonreis.ecommerce.entities.Factory;
 import com.uedsonreis.ecommerce.entities.Product;
 import com.uedsonreis.ecommerce.entities.User;
 import com.uedsonreis.ecommerce.services.ProductService;
+import com.uedsonreis.ecommerce.utils.Util;
 
 @ActiveProfiles("test")
 @TestInstance(Lifecycle.PER_CLASS)
@@ -35,6 +35,8 @@ import com.uedsonreis.ecommerce.services.ProductService;
 @AutoConfigureMockMvc
 public class TestProductController extends ControllerTester {
 
+	private String token;
+	
 	@Autowired
 	private ObjectMapper objectMapper;
 	
@@ -77,7 +79,7 @@ public class TestProductController extends ControllerTester {
 	private void testNotLogged() {
 		try {
 			Factory apple = new Factory();
-			apple.setName("Apple Inc.");
+			apple.setName("Apple");
 			
 			Product macBook = new Product();
 			macBook.setAmount(5);
@@ -85,12 +87,9 @@ public class TestProductController extends ControllerTester {
 			macBook.setPrice(14399.0);
 			macBook.setFactory(apple);
 			
-			ResultActions result = super.test(
+			super.test(
 					post("/product/add").contentType("application/json").content(this.objectMapper.writeValueAsString(macBook)),
 					status().isUnauthorized());
-			
-			String content = result.andReturn().getResponse().getContentAsString();
-			assertEquals("", content);
 			
 			super.test(
 					get("/product/add")
@@ -115,8 +114,8 @@ public class TestProductController extends ControllerTester {
 					post("/user/login").contentType("application/json").content(this.objectMapper.writeValueAsString(admin)),
 					status().isOk());
 			
-			String content = result.andReturn().getResponse().getContentAsString();
-			assertEquals(admin.getLogin(), content);
+			this.token = result.andReturn().getResponse().getContentAsString();
+			assertNotEquals("", this.token);
 			
 			Factory apple = new Factory();
 			apple.setName("Apple");
@@ -129,6 +128,7 @@ public class TestProductController extends ControllerTester {
 			
 			result = super.test(
 					get("/product/add")
+						.header(Util.AUTH, this.token)
 						.param("amount", iPhone.getAmount().toString())
 						.param("factory", apple.getName())
 						.param("name", iPhone.getName())
@@ -143,7 +143,10 @@ public class TestProductController extends ControllerTester {
 			this.idsToDelete[0] = (Integer) data;
 			
 			result = super.test(
-					post("/product/add").contentType("application/json").content(this.objectMapper.writeValueAsString(iPhone)),
+					post("/product/add")
+						.header(Util.AUTH, this.token)
+						.contentType("application/json")
+						.content(this.objectMapper.writeValueAsString(iPhone)),
 					status().isOk());
 			
 			final String content3 = result.andReturn().getResponse().getContentAsString();
@@ -173,13 +176,16 @@ public class TestProductController extends ControllerTester {
 	
 	private void testRemoveProduct() {
 		try {
-			this.mockMvc.perform(delete("/product/"+this.idsToDelete[0].toString()+"/remove"))
+			this.mockMvc.perform(delete("/product/"+this.idsToDelete[0].toString()+"/remove")
+					.header(Util.AUTH, this.token))
 				.andDo(print()).andExpect(status().isOk());
 			
-			this.mockMvc.perform(delete("/product/"+this.idsToDelete[1].toString()+"/remove"))
+			this.mockMvc.perform(delete("/product/"+this.idsToDelete[1].toString()+"/remove")
+					.header(Util.AUTH, this.token))
 				.andDo(print()).andExpect(status().isOk());
 			
-			this.mockMvc.perform(delete("/product/-1/remove"))
+			this.mockMvc.perform(delete("/product/-1/remove")
+					.header(Util.AUTH, this.token))
 				.andDo(print()).andExpect(status().isNoContent());
 			
 		} catch (Exception e) {

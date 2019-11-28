@@ -2,7 +2,7 @@ package com.uedsonreis.ecommerce.controllers;
 
 import java.util.Collection;
 
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,6 +21,7 @@ import com.uedsonreis.ecommerce.entities.Factory;
 import com.uedsonreis.ecommerce.entities.Product;
 import com.uedsonreis.ecommerce.entities.User;
 import com.uedsonreis.ecommerce.services.ProductService;
+import com.uedsonreis.ecommerce.services.UserService;
 import com.uedsonreis.ecommerce.utils.Util;
 
 @CrossOrigin(origins = "*")
@@ -29,10 +30,13 @@ import com.uedsonreis.ecommerce.utils.Util;
 public class ProductController {
 
 	@Autowired
+	UserService userService;
+	
+	@Autowired
 	ProductService productService;
 	
 	@GetMapping("/add")
-	public ResponseEntity<Object> add(HttpSession httpSession,
+	public ResponseEntity<Object> add(HttpServletRequest request,
 			@RequestParam(value="name") String name,
 			@RequestParam(value="factory") String factoryName,
 			@RequestParam(value="price") Double price,
@@ -41,13 +45,18 @@ public class ProductController {
 		Factory factory = Factory.builder().name(factoryName).build();
 		Product product = Product.builder().name(name).price(price).amount(amount).factory(factory).build();
 		
-		return this.add(httpSession, product);
+		return this.add(request, product);
 	}
 	
 	@PostMapping("/add")
-	public ResponseEntity<Object> add(HttpSession httpSession, @RequestBody Product product) {
+	public ResponseEntity<Object> add(HttpServletRequest request, @RequestBody Product product) {
 		
-		User logged = (User) httpSession.getAttribute(Util.LOGGED);
+		User logged;
+		try {
+			logged = this.userService.getLoggedUser(request.getHeader(Util.AUTH));
+		} catch (Exception e) {
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+		}
 		
 		if (logged == null || (!logged.getAdmin())) {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -69,9 +78,14 @@ public class ProductController {
 	}
 	
 	@DeleteMapping("/{id}/remove")
-	public ResponseEntity<Object> remove(HttpSession httpSession, @PathVariable(value="id") Integer id) {
+	public ResponseEntity<Object> remove(HttpServletRequest request, @PathVariable(value="id") Integer id) {
 		
-		User logged = (User) httpSession.getAttribute(Util.LOGGED);
+		User logged;
+		try {
+			logged = this.userService.getLoggedUser(request.getHeader(Util.AUTH));
+		} catch (Exception e) {
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
 		
 		if (logged == null || (!logged.getAdmin())) {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);

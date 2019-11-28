@@ -3,7 +3,7 @@ package com.uedsonreis.ecommerce.utils;
 public class Util {
 
 	public static final String CART = "cart";
-	public static final String LOGGED = "logged";
+	public static final String AUTH = "Authorization";
 	
 	public static String getMsgCustomerAlreadyExists() {
 		return "Customer email is already registered.";
@@ -43,6 +43,14 @@ public class Util {
 	
 	public static String getMsgProductPriceIsRequired() {
 		return "Product price is required!";
+	}
+	
+	public static String getTokenExpired() {
+		return "Token has expired";
+	}
+	
+	public static String getUnableToGetToken() {
+		return "Unable to get Token";
 	}
 	
 }
