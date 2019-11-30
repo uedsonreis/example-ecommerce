@@ -36,7 +36,7 @@ public class Customer {
 	private Integer age;
 	private String address;
 	
-	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 	

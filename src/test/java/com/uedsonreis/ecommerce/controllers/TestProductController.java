@@ -128,7 +128,7 @@ public class TestProductController extends ControllerTester {
 			
 			result = super.test(
 					get("/product/add")
-						.header(Util.AUTH, this.token)
+						.header(Util.AUTH, this.treatToken(this.token))
 						.param("amount", iPhone.getAmount().toString())
 						.param("factory", apple.getName())
 						.param("name", iPhone.getName())
@@ -144,7 +144,7 @@ public class TestProductController extends ControllerTester {
 			
 			result = super.test(
 					post("/product/add")
-						.header(Util.AUTH, this.token)
+						.header(Util.AUTH, this.treatToken(this.token))
 						.contentType("application/json")
 						.content(this.objectMapper.writeValueAsString(iPhone)),
 					status().isOk());
@@ -177,15 +177,15 @@ public class TestProductController extends ControllerTester {
 	private void testRemoveProduct() {
 		try {
 			this.mockMvc.perform(delete("/product/"+this.idsToDelete[0].toString()+"/remove")
-					.header(Util.AUTH, this.token))
+					.header(Util.AUTH, this.treatToken(this.token)))
 				.andDo(print()).andExpect(status().isOk());
 			
 			this.mockMvc.perform(delete("/product/"+this.idsToDelete[1].toString()+"/remove")
-					.header(Util.AUTH, this.token))
+					.header(Util.AUTH, this.treatToken(this.token)))
 				.andDo(print()).andExpect(status().isOk());
 			
 			this.mockMvc.perform(delete("/product/-1/remove")
-					.header(Util.AUTH, this.token))
+					.header(Util.AUTH, this.treatToken(this.token)))
 				.andDo(print()).andExpect(status().isNoContent());
 			
 		} catch (Exception e) {

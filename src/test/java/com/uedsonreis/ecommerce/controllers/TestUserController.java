@@ -77,7 +77,7 @@ public class TestUserController extends ControllerTester {
 			super.test(
 					post("/user/login").contentType("application/json")
 					.content(this.objectMapper.writeValueAsString(wrong)),
-					status().isBadRequest());
+					status().isUnauthorized());
 
 			// Test to a registered user.
 			final User right = new User();
@@ -97,7 +97,7 @@ public class TestUserController extends ControllerTester {
 		
 		// Test verify a logged user again
 		try {
-			ResultActions result = super.test(get("/user/logged").header(Util.AUTH, this.token), status().isOk());
+			ResultActions result = super.test(get("/user/logged").header(Util.AUTH, this.treatToken(this.token)), status().isOk());
 			String content = result.andReturn().getResponse().getContentAsString();
 			assertEquals("admin", content);
 		} catch (Exception e) {

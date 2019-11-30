@@ -183,7 +183,7 @@ public class TestSalesControllers extends ControllerTester {
 			result = super.test(
 					post("/sales/order/invoice")
 						.contentType("application/json").content(this.objectMapper.writeValueAsString(data))
-						.header(Util.AUTH, token),
+						.header(Util.AUTH, this.treatToken(token)),
 					status().isOk());
 
 			content = result.andReturn().getResponse().getContentAsString();
@@ -192,7 +192,7 @@ public class TestSalesControllers extends ControllerTester {
 			content = result.andReturn().getResponse().getContentAsString();
 			this.idsToDelete[2] = Integer.valueOf(content);
 			
-			super.test(get("/sales/order/list").header(Util.AUTH, token), status().isOk());
+			super.test(get("/sales/order/list").header(Util.AUTH, this.treatToken(token)), status().isOk());
 
 		} catch (Exception e) {
 			e.printStackTrace();

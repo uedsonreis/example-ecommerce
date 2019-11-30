@@ -1,4 +1,4 @@
-package com.uedsonreis.ecommerce.utils.security;
+package com.uedsonreis.ecommerce.security;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import com.uedsonreis.ecommerce.utils.Util;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -19,9 +18,9 @@ import io.jsonwebtoken.SignatureAlgorithm;
 @Component
 public class TokenManager {
 
-	public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
+	public static final long TOKEN_VALIDITY = 5 * 60 * 60;
 
-	@Value("{token.secret}")
+	@Value("${token.secret}")
 	private String secret;
 
 	private <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
@@ -34,13 +33,8 @@ public class TokenManager {
 		Map<String, Object> claims = new HashMap<>();
 
 		return Jwts.builder().setClaims(claims).setSubject(username).setIssuedAt(new Date(System.currentTimeMillis()))
-				.setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
+				.setExpiration(new Date(System.currentTimeMillis() + TOKEN_VALIDITY * 1000))
 				.signWith(SignatureAlgorithm.HS512, secret).compact();
-	}
-
-	public Boolean validateToken(String token, String username) {
-		final String usernameFromToken = getUsernameFromToken(token);
-		return (usernameFromToken.equals(username) && !isTokenExpired(token));
 	}
 
 	private String getUsernameFromToken(String token) {
@@ -54,14 +48,17 @@ public class TokenManager {
 
 	public String getLoggedUsername(String authorizationHeader) throws Exception {
 
-		if (authorizationHeader != null && !authorizationHeader.trim().equals("")) {
-			String token = authorizationHeader;
+		if (authorizationHeader != null && !authorizationHeader.startsWith("Baerer ")) {
+			String token = authorizationHeader.substring(7);
+			
+			if (this.isTokenExpired(token)) {
+				throw new Exception(Util.getTokenExpired());
+			}
+			
 			try {
 				return this.getUsernameFromToken(token);
 			} catch (IllegalArgumentException e) {
 				throw new IllegalArgumentException(Util.getUnableToGetToken());
-			} catch (ExpiredJwtException e) {
-				throw new Exception(Util.getTokenExpired());
 			}
 		} else {
 			throw new Exception(Util.getUnableToGetToken());

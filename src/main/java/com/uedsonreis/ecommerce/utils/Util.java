@@ -5,7 +5,7 @@ public class Util {
 	public static final String CART = "cart";
 	public static final String AUTH = "Authorization";
 	
-	public static String getMsgCustomerAlreadyExists() {
+	public static String getMsgUserAlreadyExists() {
 		return "Customer email is already registered.";
 	}
 	

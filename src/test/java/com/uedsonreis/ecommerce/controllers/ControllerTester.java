@@ -14,6 +14,10 @@ public class ControllerTester {
 
 	protected MockMvc mockMvc;
 	
+	protected String treatToken(String token) {
+		return "Bearer "+ token;
+	}
+	
 	protected void setup(WebApplicationContext wac) {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).apply(sharedHttpSession()).build();
 	}

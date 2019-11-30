@@ -12,6 +12,9 @@ import com.uedsonreis.ecommerce.utils.Util;
 public class CustomerService {
 	
 	@Autowired
+	private UserService userService;
+	
+	@Autowired
 	private CustomerRepository repository;
 	
 	public Integer save(Customer customer) throws Exception {
@@ -25,10 +28,10 @@ public class CustomerService {
 		
 		Customer customerDB = this.repository.findByEmail(customer.getEmail());
 		
-		if (customerDB != null) throw new Exception(Util.getMsgCustomerAlreadyExists());
+		if (customerDB != null) throw new Exception(Util.getMsgUserAlreadyExists());
 		
 		customer.getUser().setLogin(customer.getEmail());
-		customer.getUser().setAdmin(false);
+		this.userService.save(customer.getUser());
 		
 		customerDB = this.repository.save(customer);
 
