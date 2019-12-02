@@ -42,10 +42,8 @@ public class RequestFilter extends OncePerRequestFilter {
 
 			if (user != null) {
 				UsernamePasswordAuthenticationToken userToken = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-				System.out.println("Passando 1: "+ userToken);
 				userToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 				SecurityContextHolder.getContext().setAuthentication(userToken);
-				System.out.println("Passando 2: "+ SecurityContextHolder.getContext().getAuthentication());
 			}
 		}
 

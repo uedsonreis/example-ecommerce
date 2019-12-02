@@ -64,6 +64,8 @@ public class UserController {
 	@PostMapping("/customer/add")
 	public ResponseEntity<Object> addCustomer(@RequestBody Customer customer) {
 		
+		final String password = customer.getUser().getPassword(); 
+		
 		Integer id = null;
 		try {
 			id = this.customerService.save(customer);
@@ -74,7 +76,13 @@ public class UserController {
 		if (id == null) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		} else {
-			String token = this.userService.generateToken(customer.getUser());
+			User user = customer.getUser();
+			
+			this.authenticationManager.authenticate(
+				new UsernamePasswordAuthenticationToken(user.getLogin(), password, user.getAuthorities())
+			);
+			
+			String token = this.userService.generateToken(user);
 			return new ResponseEntity<>(token, HttpStatus.OK);
 		}
 	}
