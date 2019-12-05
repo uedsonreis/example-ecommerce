@@ -47,7 +47,7 @@ public class SalesOrderController {
 		} else {
 			try {
 				SalesOrder salesOrder = this.salesOrderService.invoice(cart, logged);
-				return new ResponseEntity<>(salesOrder.getId(), HttpStatus.OK);
+				return new ResponseEntity<>(salesOrder, HttpStatus.OK);
 				
 			} catch (Exception e) {
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);

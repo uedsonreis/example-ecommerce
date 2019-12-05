@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Collection;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,7 @@ import com.uedsonreis.ecommerce.entities.Customer;
 import com.uedsonreis.ecommerce.entities.Factory;
 import com.uedsonreis.ecommerce.entities.Item;
 import com.uedsonreis.ecommerce.entities.Product;
+import com.uedsonreis.ecommerce.entities.SalesOrder;
 import com.uedsonreis.ecommerce.entities.User;
 import com.uedsonreis.ecommerce.repositories.CustomerRepository;
 import com.uedsonreis.ecommerce.repositories.ItemRepository;
@@ -134,7 +136,7 @@ public class TestSalesControllers extends ControllerTester {
 
 		super.test(
 				post("/cart/add").contentType("application/json").content(this.objectMapper.writeValueAsString(item)),
-				status().isOk());			
+				status().isOk());
 	}
 	
 	@Test
@@ -189,8 +191,8 @@ public class TestSalesControllers extends ControllerTester {
 			content = result.andReturn().getResponse().getContentAsString();
 			assertNotEquals("", content);
 			
-			content = result.andReturn().getResponse().getContentAsString();
-			this.idsToDelete[2] = Integer.valueOf(content);
+			data = objectMapper.readValue(new JSONObject(content).toString(), SalesOrder.class);
+			this.idsToDelete[2] = ((SalesOrder) data).getId();
 			
 			super.test(get("/sales/order/list").header(Util.AUTH, this.treatToken(token)), status().isOk());
 
