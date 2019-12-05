@@ -44,7 +44,9 @@ public class User implements UserDetails {
 	
 	private String login;
 	private String password;
-	private Boolean admin;
+	
+	@Builder.Default
+	private Boolean admin = false;
 
 	public String getUsername() {
 		return this.login;

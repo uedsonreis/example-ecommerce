@@ -91,6 +91,7 @@ public class SalesOrderService {
 		
 		for (SalesOrder salesOrder: salesOrders) {
 			Set<Item> items = this.itemRepository.findAllBySalesOrder(salesOrder);
+			for (Item item: items) item.setSalesOrder(null);
 			salesOrder.setItems(items);
 		}
 		
