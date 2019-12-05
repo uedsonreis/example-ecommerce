@@ -86,7 +86,15 @@ public class SalesOrderService {
 	public Collection<SalesOrder> getSalesOrders(User user) {
 		Customer customer = this.customerService.get(user);
 		if (customer == null) return new ArrayList<SalesOrder>();
-		return this.salesOrderRepository.findAllByCustomer(customer);
+		
+		Collection<SalesOrder> salesOrders = this.salesOrderRepository.findAllByCustomer(customer);
+		
+		for (SalesOrder salesOrder: salesOrders) {
+			Set<Item> items = this.itemRepository.findAllBySalesOrder(salesOrder);
+			salesOrder.setItems(items);
+		}
+		
+		return salesOrders;
 	}
 	
 }
