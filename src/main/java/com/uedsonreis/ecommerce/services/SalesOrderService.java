@@ -90,6 +90,7 @@ public class SalesOrderService {
 		Collection<SalesOrder> salesOrders = this.salesOrderRepository.findAllByCustomer(customer);
 		
 		for (SalesOrder salesOrder: salesOrders) {
+			salesOrder.getCustomer().setUser(null);
 			Set<Item> items = this.itemRepository.findAllBySalesOrder(salesOrder);
 			for (Item item: items) item.setSalesOrder(null);
 			salesOrder.setItems(items);
