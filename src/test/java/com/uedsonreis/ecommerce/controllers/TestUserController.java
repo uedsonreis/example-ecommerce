@@ -122,15 +122,6 @@ public class TestUserController extends ControllerTester {
 		try {
 			// Test to a incorrect age.
 			ResultActions result = super.test(
-					get("/user/customer/add")
-						.param("address", customer.getAddress())
-						.param("age", customer.getAge().toString())
-						.param("email", customer.getEmail())
-						.param("name", customer.getName())
-						.param("password", user.getPassword()),
-					status().isBadRequest());
-
-			result = super.test(
 					post("/user/customer/add").contentType("application/json").content(this.objectMapper.writeValueAsString(customer)),
 					status().isBadRequest());
 
@@ -138,14 +129,9 @@ public class TestUserController extends ControllerTester {
 			customer.setAge(37);
 			
 			result = super.test(
-					get("/user/customer/add")
-						.param("address", customer.getAddress())
-						.param("age", customer.getAge().toString())
-						.param("email", customer.getEmail())
-						.param("name", customer.getName())
-						.param("password", user.getPassword()),
-					status().isOk());
-						
+					post("/user/customer/add").contentType("application/json").content(this.objectMapper.writeValueAsString(customer)),
+					status().isCreated());
+			
 			this.token = result.andReturn().getResponse().getContentAsString();
 			assertNotEquals("", this.token);
 

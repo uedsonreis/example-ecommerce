@@ -8,6 +8,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 
 import com.uedsonreis.ecommerce.entities.Factory;
 import com.uedsonreis.ecommerce.entities.Product;
@@ -16,7 +17,9 @@ import com.uedsonreis.ecommerce.repositories.FactoryRepository;
 import com.uedsonreis.ecommerce.repositories.UserRepository;
 import com.uedsonreis.ecommerce.services.ProductService;
 import com.uedsonreis.ecommerce.services.UserService;
+import com.uedsonreis.ecommerce.utils.SwaggerConfig;
 
+@Import({ SwaggerConfig.class })
 @SpringBootApplication
 public class Application {
 

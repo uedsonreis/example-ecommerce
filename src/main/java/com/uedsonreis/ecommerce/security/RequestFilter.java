@@ -34,10 +34,10 @@ public class RequestFilter extends OncePerRequestFilter {
 		if (SecurityContextHolder.getContext().getAuthentication() == null) {
 			
 			try {
-				System.out.println("Token: "+ jwtToken);
 				user = this.userService.getLoggedUser(jwtToken);
 			} catch (Exception e) {
-				System.out.println("Invalid Token: "+ e.getMessage());
+				System.out.print("Token "+ jwtToken +" ");
+				System.out.println("is invalid: "+ e.getMessage());
 			}
 
 			if (user != null) {

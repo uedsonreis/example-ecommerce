@@ -8,11 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uedsonreis.ecommerce.entities.Customer;
@@ -21,6 +19,12 @@ import com.uedsonreis.ecommerce.services.CustomerService;
 import com.uedsonreis.ecommerce.services.UserService;
 import com.uedsonreis.ecommerce.utils.Util;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
+@Api(value = "UserManagement")
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("user")
@@ -35,6 +39,14 @@ public class UserController {
 	@Autowired
 	private CustomerService customerService;
 	
+	@ApiOperation(
+			value = "It does check if there is a logged user",
+			response = User.class
+		)
+	@ApiResponses(value = {
+		@ApiResponse(code = 200, message = "It returns the logged username"),
+		@ApiResponse(code = 204, message = "No one is logged")
+	})
 	@RequestMapping("/logged")
 	public ResponseEntity<String> logged(HttpServletRequest request) {
 		User logged;
@@ -46,21 +58,15 @@ public class UserController {
 		
 		return new ResponseEntity<>(logged.getLogin(), HttpStatus.OK);
 	}
-
-	@GetMapping("/customer/add")
-	public ResponseEntity<Object> addCustomer(
-			@RequestParam(value="email") String email,
-			@RequestParam(value="name") String name,
-			@RequestParam(value="age") Integer age,
-			@RequestParam(value="address") String address,
-			@RequestParam(value="password") String password) {
-
-		User user = User.builder().password(password).build();
-		Customer customer = Customer.builder().email(email).name(name).age(age).address(address).user(user).build();
-		
-		return this.addCustomer(customer);
-	}
 	
+	@ApiOperation(
+			value = "It does registry a new customer user",
+			response = User.class
+		)
+	@ApiResponses(value = {
+		@ApiResponse(code = 201, message = "Customer created with success"),
+		@ApiResponse(code = 400, message = "Some wrong with the parameters")
+	})
 	@PostMapping("/customer/add")
 	public ResponseEntity<Object> addCustomer(@RequestBody Customer customer) {
 		
@@ -83,10 +89,17 @@ public class UserController {
 			);
 			
 			String token = this.userService.generateToken(user);
-			return new ResponseEntity<>(token, HttpStatus.OK);
+			return new ResponseEntity<>(token, HttpStatus.CREATED);
 		}
 	}
 	
+	@ApiOperation(
+			value = "It does login with an username and a password"
+		)
+	@ApiResponses(value = {
+		@ApiResponse(code = 200, message = "Successfully login"),
+		@ApiResponse(code = 401, message = "You are not authorized to login in this system")
+	})
 	@PostMapping("/login")
 	public ResponseEntity<String> login(@RequestBody User user) {
 		try {

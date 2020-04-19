@@ -44,7 +44,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity.csrf().disable()
 			.cors().and()
-			.authorizeRequests().antMatchers("/product/list", "/user/**").permitAll()
+			.authorizeRequests().antMatchers(
+					"/product/list", "/user/**", "/v2/api-docs",
+					"/swagger-resources/**", "/swagger-ui.html", "/webjars/**"
+			).permitAll()
 			.anyRequest().authenticated();
 
 		httpSecurity.addFilterBefore(this.requestFilter, UsernamePasswordAuthenticationFilter.class);

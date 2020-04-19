@@ -18,7 +18,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 @Component
 public class TokenManager {
 
-	public static final long TOKEN_VALIDITY = 5 * 60 * 60;
+	public static final long TOKEN_VALIDITY = 5 * 60 * 60; // 5h
 
 	@Value("${token.secret}")
 	private String secret;

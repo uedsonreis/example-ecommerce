@@ -167,13 +167,8 @@ public class TestSalesControllers extends ControllerTester {
 			customer.setAddress("Rua Fulano de Tal, n. 13");
 			
 			ResultActions result = super.test(
-					get("/user/customer/add")
-						.param("address", customer.getAddress())
-						.param("age", customer.getAge().toString())
-						.param("email", customer.getEmail())
-						.param("name", customer.getName())
-						.param("password", user.getPassword()),
-					status().isOk());
+					post("/user/customer/add").contentType("application/json").content(this.objectMapper.writeValueAsString(customer)),
+					status().isCreated());
 			
 			String token = result.andReturn().getResponse().getContentAsString();
 			assertNotEquals("", token);
