@@ -91,14 +91,6 @@ public class TestProductController extends ControllerTester {
 					post("/product/add").contentType("application/json").content(this.objectMapper.writeValueAsString(macBook)),
 					status().isUnauthorized());
 			
-			super.test(
-					get("/product/add")
-						.param("amount", macBook.getAmount().toString())
-						.param("factory", apple.getName())
-						.param("name", macBook.getName())
-						.param("price", macBook.getPrice().toString()),
-					status().isUnauthorized());
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -127,22 +119,6 @@ public class TestProductController extends ControllerTester {
 			iPhone.setFactory(apple);
 			
 			result = super.test(
-					get("/product/add")
-						.header(Util.AUTH, this.treatToken(this.token))
-						.param("amount", iPhone.getAmount().toString())
-						.param("factory", apple.getName())
-						.param("name", iPhone.getName())
-						.param("price", iPhone.getPrice().toString()),
-					status().isOk());
-
-			final String content2 = result.andReturn().getResponse().getContentAsString();
-			assertDoesNotThrow(() -> { Integer.valueOf(content2); });
-			
-			Object data = objectMapper.readValue(content2.toString(), Integer.class);
-				
-			this.idsToDelete[0] = (Integer) data;
-			
-			result = super.test(
 					post("/product/add")
 						.header(Util.AUTH, this.treatToken(this.token))
 						.contentType("application/json")
@@ -152,9 +128,9 @@ public class TestProductController extends ControllerTester {
 			final String content3 = result.andReturn().getResponse().getContentAsString();
 			assertDoesNotThrow(() -> { Integer.valueOf(content3); });
 			
-			data = objectMapper.readValue(content3.toString(), Integer.class);
+			Object data = objectMapper.readValue(content3.toString(), Integer.class);
 				
-			this.idsToDelete[1] = (Integer) data;
+			this.idsToDelete[0] = (Integer) data;
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -177,10 +153,6 @@ public class TestProductController extends ControllerTester {
 	private void testRemoveProduct() {
 		try {
 			this.mockMvc.perform(delete("/product/"+this.idsToDelete[0].toString()+"/remove")
-					.header(Util.AUTH, this.treatToken(this.token)))
-				.andDo(print()).andExpect(status().isOk());
-			
-			this.mockMvc.perform(delete("/product/"+this.idsToDelete[1].toString()+"/remove")
 					.header(Util.AUTH, this.treatToken(this.token)))
 				.andDo(print()).andExpect(status().isOk());
 			

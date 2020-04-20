@@ -14,15 +14,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.uedsonreis.ecommerce.entities.Factory;
 import com.uedsonreis.ecommerce.entities.Product;
 import com.uedsonreis.ecommerce.entities.User;
 import com.uedsonreis.ecommerce.services.ProductService;
 import com.uedsonreis.ecommerce.services.UserService;
 import com.uedsonreis.ecommerce.utils.Util;
+
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -34,19 +33,6 @@ public class ProductController {
 	
 	@Autowired
 	ProductService productService;
-	
-	@GetMapping("/add")
-	public ResponseEntity<Object> add(HttpServletRequest request,
-			@RequestParam(value="name") String name,
-			@RequestParam(value="factory") String factoryName,
-			@RequestParam(value="price") Double price,
-			@RequestParam(value="amount") Integer amount) {
-		
-		Factory factory = Factory.builder().name(factoryName).build();
-		Product product = Product.builder().name(name).price(price).amount(amount).factory(factory).build();
-		
-		return this.add(request, product);
-	}
 	
 	@PostMapping("/add")
 	public ResponseEntity<Object> add(HttpServletRequest request, @RequestBody Product product) {
