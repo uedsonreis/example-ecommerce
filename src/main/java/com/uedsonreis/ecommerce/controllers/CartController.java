@@ -12,30 +12,23 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uedsonreis.ecommerce.entities.Item;
-import com.uedsonreis.ecommerce.entities.Product;
 import com.uedsonreis.ecommerce.utils.Util;
+
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("cart")
 public class CartController {
 
-	@GetMapping("/add")
-	public void add(HttpSession httpSession,
-			@RequestParam(value="productId") Integer productId,
-			@RequestParam(value="price") Double price,
-			@RequestParam(value="amount") Integer amount) {
-		
-		Product product = Product.builder().id(productId).build();
-		Item item = Item.builder().price(price).amount(amount).product(product).build();
-		
-		this.add(httpSession, item);
-	}
-	
+	@ApiOperation(
+		value = "It does add a new item in the cart"
+	)
 	@PostMapping("/add")
 	public void add(HttpSession httpSession, @RequestBody Item item) {
 
@@ -52,7 +45,14 @@ public class CartController {
 		httpSession.setAttribute(Util.CART, cart);
 	}
 	
-	@RequestMapping("/list")
+	@ApiOperation(
+		value = "It does return the items in the cart"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(code = 200, message = "It returns the items in the cart"),
+		@ApiResponse(code = 204, message = "There is no item in the cart")
+	})
+	@GetMapping("/list")
 	public ResponseEntity<Object> list(HttpSession httpSession) {
 		Map<Integer, Item> cart = this.getShoppingCart(httpSession);
 		

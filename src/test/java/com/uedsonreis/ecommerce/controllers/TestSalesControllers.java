@@ -120,16 +120,18 @@ public class TestSalesControllers extends ControllerTester {
 		
 		Product product1 = products[0];
 		
+		Item item = new Item();
+		item.setAmount(1);
+		item.setProduct(product1);
+		item.setPrice(product1.getPrice());
+		
 		super.test(
-				get("/cart/add")
-					.param("productId", product1.getId().toString())
-					.param("amount", "1")
-					.param("price", product1.getPrice().toString()),
+				post("/cart/add").contentType("application/json").content(this.objectMapper.writeValueAsString(item)),
 				status().isOk());
 		
 		Product product2 = products[1];
 		
-		Item item = new Item();
+		item = new Item();
 		item.setAmount(2);
 		item.setProduct(product2);
 		item.setPrice(product2.getPrice() * 0.9);

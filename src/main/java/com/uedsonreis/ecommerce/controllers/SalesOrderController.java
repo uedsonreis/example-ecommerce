@@ -21,6 +21,10 @@ import com.uedsonreis.ecommerce.services.SalesOrderService;
 import com.uedsonreis.ecommerce.services.UserService;
 import com.uedsonreis.ecommerce.utils.Util;
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("sales/order")
@@ -32,6 +36,14 @@ public class SalesOrderController {
 	@Autowired
 	private SalesOrderService salesOrderService;
 	
+	@ApiOperation(
+		value = "It does registry a new sales order"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(code = 200, message = "It returns the new sales order"),
+		@ApiResponse(code = 400, message = "Inconsistent data"),
+		@ApiResponse(code = 401, message = "User must be logged in")
+	})
 	@PostMapping("/invoice")
 	public ResponseEntity<Object> invoice(HttpServletRequest request, @RequestBody Collection<Item> cart) {
 		User logged;
@@ -42,7 +54,7 @@ public class SalesOrderController {
 		}
 		
 		if (cart == null) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 			
 		} else {
 			try {
@@ -55,6 +67,14 @@ public class SalesOrderController {
 		}
 	}
 	
+	@ApiOperation(
+		value = "It does return the sales order list"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(code = 200, message = "It returns the sales order list"),
+		@ApiResponse(code = 204, message = "There is no sales order registered"),
+		@ApiResponse(code = 401, message = "User must be logged in")
+	})
 	@GetMapping("/list")
 	public ResponseEntity<Object> login(HttpServletRequest request) {
 		User logged;

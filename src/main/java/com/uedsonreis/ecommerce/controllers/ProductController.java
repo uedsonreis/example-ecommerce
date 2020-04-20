@@ -22,6 +22,10 @@ import com.uedsonreis.ecommerce.services.ProductService;
 import com.uedsonreis.ecommerce.services.UserService;
 import com.uedsonreis.ecommerce.utils.Util;
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -34,6 +38,14 @@ public class ProductController {
 	@Autowired
 	ProductService productService;
 	
+	@ApiOperation(
+		value = "It add a new product in database"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(code = 200, message = "It returns the id of the new product"),
+		@ApiResponse(code = 400, message = "Inconsistent data"),
+		@ApiResponse(code = 401, message = "User must be a admin to be able to add a new product")
+	})
 	@PostMapping("/add")
 	public ResponseEntity<Object> add(HttpServletRequest request, @RequestBody Product product) {
 		
@@ -63,6 +75,14 @@ public class ProductController {
 		}
 	}
 	
+	@ApiOperation(
+		value = "It does delete a product in the database"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(code = 200, message = "Product was delete"),
+		@ApiResponse(code = 204, message = "There is no product with this ID"),
+		@ApiResponse(code = 401, message = "User must be a admin to be able to remove a product")
+	})
 	@DeleteMapping("/{id}/remove")
 	public ResponseEntity<Object> remove(HttpServletRequest request, @PathVariable(value="id") Integer id) {
 		
@@ -70,7 +90,7 @@ public class ProductController {
 		try {
 			logged = this.userService.getLoggedUser(request.getHeader(Util.AUTH));
 		} catch (Exception e) {
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
 		}
 		
 		if (logged == null || (!logged.getAdmin())) {
@@ -84,6 +104,13 @@ public class ProductController {
 		}
 	}
 	
+	@ApiOperation(
+		value = "It get the product list registered"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(code = 200, message = "It returns the product list"),
+		@ApiResponse(code = 204, message = "There is no registered product")
+	})
 	@GetMapping("/list")
 	public ResponseEntity<Object> list() {
 		

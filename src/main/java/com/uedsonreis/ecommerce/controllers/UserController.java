@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,12 +20,10 @@ import com.uedsonreis.ecommerce.services.CustomerService;
 import com.uedsonreis.ecommerce.services.UserService;
 import com.uedsonreis.ecommerce.utils.Util;
 
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-@Api(value = "UserManagement")
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("user")
@@ -40,14 +39,14 @@ public class UserController {
 	private CustomerService customerService;
 	
 	@ApiOperation(
-			value = "It does check if there is a logged user",
-			response = User.class
-		)
+		value = "It does check if there is a logged user",
+		response = User.class
+	)
 	@ApiResponses(value = {
 		@ApiResponse(code = 200, message = "It returns the logged username"),
 		@ApiResponse(code = 204, message = "No one is logged")
 	})
-	@RequestMapping("/logged")
+	@GetMapping("/logged")
 	public ResponseEntity<String> logged(HttpServletRequest request) {
 		User logged;
 		try {
@@ -60,9 +59,9 @@ public class UserController {
 	}
 	
 	@ApiOperation(
-			value = "It does registry a new customer user",
-			response = User.class
-		)
+		value = "It does registry a new customer user and return his token",
+		response = String.class
+	)
 	@ApiResponses(value = {
 		@ApiResponse(code = 201, message = "Customer created with success"),
 		@ApiResponse(code = 400, message = "Some wrong with the parameters")
@@ -94,8 +93,8 @@ public class UserController {
 	}
 	
 	@ApiOperation(
-			value = "It does login with an username and a password"
-		)
+		value = "It does login with an username and a password"
+	)
 	@ApiResponses(value = {
 		@ApiResponse(code = 200, message = "Successfully login"),
 		@ApiResponse(code = 401, message = "You are not authorized to login in this system")
