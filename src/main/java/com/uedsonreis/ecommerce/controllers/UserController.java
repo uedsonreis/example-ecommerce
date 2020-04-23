@@ -39,7 +39,7 @@ public class UserController {
 	private CustomerService customerService;
 	
 	@ApiOperation(
-		value = "It does check if there is a logged user",
+		value = "It returns the username for a given token in headers",
 		response = User.class
 	)
 	@ApiResponses(value = {
