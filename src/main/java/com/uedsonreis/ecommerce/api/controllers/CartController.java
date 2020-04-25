@@ -1,4 +1,4 @@
-package com.uedsonreis.ecommerce.controllers;
+package com.uedsonreis.ecommerce.api.controllers;
 
 import java.util.HashMap;
 import java.util.Map;

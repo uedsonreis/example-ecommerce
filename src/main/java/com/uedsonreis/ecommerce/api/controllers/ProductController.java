@@ -1,4 +1,4 @@
-package com.uedsonreis.ecommerce.controllers;
+package com.uedsonreis.ecommerce.api.controllers;
 
 import java.util.Collection;
 
@@ -105,11 +105,11 @@ public class ProductController {
 	}
 	
 	@ApiOperation(
-		value = "It get the product list registered"
+		value = "It get the registered product list."
 	)
 	@ApiResponses(value = {
-		@ApiResponse(code = 200, message = "It returns the product list"),
-		@ApiResponse(code = 204, message = "There is no registered product")
+		@ApiResponse(code = 200, response = Product[].class, message = "It returns the product list."),
+		@ApiResponse(code = 204, message = "There is no registered product.")
 	})
 	@GetMapping("/list")
 	public ResponseEntity<Object> list() {
