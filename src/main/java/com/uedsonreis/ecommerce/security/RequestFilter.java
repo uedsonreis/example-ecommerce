@@ -36,8 +36,8 @@ public class RequestFilter extends OncePerRequestFilter {
 			try {
 				user = this.userService.getLoggedUser(jwtToken);
 			} catch (Exception e) {
-				System.out.print("Token "+ jwtToken +" ");
-				System.out.println("is invalid: "+ e.getMessage());
+				System.err.print("Token "+ jwtToken +" ");
+				System.err.println("is invalid: "+ e.getMessage());
 			}
 
 			if (user != null) {

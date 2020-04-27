@@ -158,7 +158,7 @@ public class TestProductController extends ControllerTester {
 			
 			this.mockMvc.perform(delete("/product/-1/remove")
 					.header(Util.AUTH, this.treatToken(this.token)))
-				.andDo(print()).andExpect(status().isNoContent());
+				.andDo(print()).andExpect(status().isNotFound());
 			
 		} catch (Exception e) {
 			e.printStackTrace();

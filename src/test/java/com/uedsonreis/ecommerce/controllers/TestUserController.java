@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.uedsonreis.ecommerce.api.dto.customer.CustomerInput;
 import com.uedsonreis.ecommerce.entities.Customer;
 import com.uedsonreis.ecommerce.entities.User;
 import com.uedsonreis.ecommerce.repositories.CustomerRepository;
@@ -112,9 +113,9 @@ public class TestUserController extends ControllerTester {
 		user.setLogin("uedson@reis.com");
 		user.setPassword("321");
 		
-		Customer customer = new Customer();
+		CustomerInput customer = new CustomerInput();
 		customer.setAge(16);
-		customer.setUser(user);
+		customer.setUserPassword(user.getPassword());
 		customer.setName("Uedson Reis");
 		customer.setEmail(user.getLogin());
 		customer.setAddress("Rua Fulano de Tal, n. 13");

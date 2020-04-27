@@ -3,6 +3,7 @@ package com.uedsonreis.ecommerce.api.controllers;
 import java.util.Collection;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,15 +40,15 @@ public class ProductController {
 	ProductService productService;
 	
 	@ApiOperation(
-		value = "It add a new product in database"
+		value = "It add a new product in database."
 	)
 	@ApiResponses(value = {
-		@ApiResponse(code = 200, message = "It returns the id of the new product"),
-		@ApiResponse(code = 400, message = "Inconsistent data"),
-		@ApiResponse(code = 401, message = "User must be a admin to be able to add a new product")
+		@ApiResponse(code = 200, message = "It returns the ID of the new product."),
+		@ApiResponse(code = 400, message = "Inconsistent data."),
+		@ApiResponse(code = 401, message = "User must be a admin to be able to add a new product.")
 	})
 	@PostMapping("/add")
-	public ResponseEntity<Object> add(HttpServletRequest request, @RequestBody Product product) {
+	public ResponseEntity<Object> add(HttpServletRequest request, @Valid @RequestBody Product product) {
 		
 		User logged;
 		try {
@@ -76,12 +77,12 @@ public class ProductController {
 	}
 	
 	@ApiOperation(
-		value = "It does delete a product in the database"
+		value = "It does delete a product in the database."
 	)
 	@ApiResponses(value = {
-		@ApiResponse(code = 200, message = "Product was delete"),
-		@ApiResponse(code = 204, message = "There is no product with this ID"),
-		@ApiResponse(code = 401, message = "User must be a admin to be able to remove a product")
+		@ApiResponse(code = 200, message = "Product was delete."),
+		@ApiResponse(code = 401, message = "User must be a admin to be able to remove a product."),
+		@ApiResponse(code = 404, message = "There is no product with this ID.")
 	})
 	@DeleteMapping("/{id}/remove")
 	public ResponseEntity<Object> remove(HttpServletRequest request, @PathVariable(value="id") Integer id) {
@@ -100,7 +101,7 @@ public class ProductController {
 		if (this.productService.remove(id)) {
 			return new ResponseEntity<>(HttpStatus.OK);
 		} else {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 	

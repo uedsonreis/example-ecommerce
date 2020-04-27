@@ -68,12 +68,12 @@ public class SalesOrderController {
 	}
 	
 	@ApiOperation(
-		value = "It does return the sales order list"
+		value = "It does return the sales order list."
 	)
 	@ApiResponses(value = {
-		@ApiResponse(code = 200, message = "It returns the sales order list"),
-		@ApiResponse(code = 204, message = "There is no sales order registered"),
-		@ApiResponse(code = 401, message = "User must be logged in")
+		@ApiResponse(code = 200, message = "It returns the sales order list."),
+		@ApiResponse(code = 204, message = "There is no sales order registered."),
+		@ApiResponse(code = 401, message = "User must be logged in.")
 	})
 	@GetMapping("/list")
 	public ResponseEntity<Object> login(HttpServletRequest request) {
@@ -81,15 +81,15 @@ public class SalesOrderController {
 		try {
 			logged = this.userService.getLoggedUser(request.getHeader(Util.AUTH));
 		} catch (Exception e) {
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
 		}
 		
 		Collection<SalesOrder> salesOrders = this.salesOrderService.getSalesOrders(logged);
 		
 		if (salesOrders.size() < 1) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			return ResponseEntity.noContent().build();
 		} else {
-			return new ResponseEntity<>(salesOrders, HttpStatus.OK);
+			return ResponseEntity.ok(salesOrders);
 		}
 	}
 

@@ -7,6 +7,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,8 +32,13 @@ public class Product {
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Integer id;
 	
+	@NotBlank
 	private String name;
+	
+	@NotNull
 	private Double price;
+	
+	@NotNull
 	private Integer amount;
 	
 	@OneToOne(fetch = FetchType.EAGER)
