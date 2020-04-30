@@ -67,6 +67,7 @@ public class UserController {
 	
 	@ApiOperation(
 		value = "It does registry a new customer user and return his token",
+		notes = "The user must be an adult (age equals 18 or greater).",
 		response = String.class
 	)
 	@ApiResponses(value = {
